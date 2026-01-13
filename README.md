@@ -4,7 +4,11 @@ This repository contains the source code for my resume, built using [RenderCV](h
 
 RenderCV takes a YAML input file (`Mantu_CV.yaml`) and generates a professional, LaTeX-formatted PDF.
 
-## 🚀 Quick Start
+## � Resume PDF
+
+- **[View/Download Resume](https://drive.google.com/file/d/YOUR_FILE_ID/view)**: Latest version of my resume (Google Drive)
+
+## �🚀 Quick Start
 
 ### Installation
 
