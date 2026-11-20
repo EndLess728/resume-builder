@@ -14,7 +14,7 @@ on:
       toolkit_repository:
         description: Repo that holds this workflow's scripts
         type: string
-        default: EndLess728/MyResume
+        default: EndLess728/resume-builder
       toolkit_ref:
         description: Branch, tag or SHA of the toolkit repo to use
         type: string
