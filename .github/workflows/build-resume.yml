@@ -95,13 +95,13 @@ jobs:
     steps:
       # ── 1. Setup ──────────────────────────────────────────────────────────
       - name: Checkout CV repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # job.workflow_* describe this reusable workflow itself (not the caller),
       # so the modules always match the version the caller pinned. Modules are
       # then used from this checkout as ./.resume-toolkit/.github/actions/<name>.
       - name: Checkout resume toolkit
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           repository: ${{ inputs.toolkit_repository || job.workflow_repository || 'EndLess728/resume-builder' }}
           ref: ${{ inputs.toolkit_ref || job.workflow_sha || 'main' }}
@@ -111,7 +111,7 @@ jobs:
         run: echo "resume-builder toolkit at $(git -C .resume-toolkit rev-parse HEAD)"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -167,7 +167,7 @@ jobs:
       # ── 5. Save ───────────────────────────────────────────────────────────
       - name: Upload artifact
         if: inputs.upload_artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ inputs.artifact_name }}
           path: |

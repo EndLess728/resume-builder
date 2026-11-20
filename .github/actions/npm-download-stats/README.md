@@ -20,7 +20,7 @@ It edits the CV YAML in place before RenderCV runs. An existing `(... downloads)
 ## Use it on its own
 
 ```yaml
-- uses: actions/checkout@v4
+- uses: actions/checkout@v7
 - uses: EndLess728/resume-builder/.github/actions/npm-download-stats@v1
   with:
     cv_file: My_CV.yaml
