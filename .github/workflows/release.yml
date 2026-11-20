@@ -6,7 +6,8 @@ name: Release
 #   - push a tag yourself: git tag v1.2.0 && git push origin v1.2.0
 #
 # The workflow renders example_CV.yaml with that exact version, attaches the
-# sample PDF and PNG previews to a GitHub release, and moves the major tag (v1)
+# sample PDF to a GitHub release, refreshes the README preview image
+# (docs/sample-resume.png) on the default branch, and moves the major tag (v1)
 # so callers pinned to @v1 pick up the new version. Pre-release versions
 # (v1.2.0-rc.1) are published as pre-releases and leave the major tag alone.
 
@@ -79,8 +80,10 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       TAG: ${{ needs.tag.outputs.tag }}
     steps:
-      - name: Checkout
+      - name: Checkout default branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
 
       - name: Download sample resume
         uses: actions/download-artifact@v4
@@ -88,15 +91,10 @@ jobs:
           name: sample-resume
           path: sample
 
-      - name: Name release assets
+      - name: Name release asset
         run: |
           mkdir assets
           cp sample/*.pdf assets/sample-resume.pdf
-          i=1
-          for png in $(ls sample/*.png | sort); do
-            cp "$png" "assets/sample-resume-page-$i.png"
-            i=$((i + 1))
-          done
           ls -l assets
 
       - name: Create GitHub release
@@ -123,19 +121,33 @@ jobs:
 
           if gh release view "$TAG" >/dev/null 2>&1; then
             echo "Release $TAG already exists; refreshing its assets."
-            gh release upload "$TAG" assets/* --clobber
+            gh release upload "$TAG" assets/sample-resume.pdf --clobber
             exit 0
           fi
 
           flags=()
           [[ "$TAG" == *-* ]] && flags+=(--prerelease)
 
-          gh release create "$TAG" assets/* \
+          gh release create "$TAG" assets/sample-resume.pdf \
             --title "$TAG" \
             --notes-file notes.md \
             --generate-notes \
             --verify-tag \
             "${flags[@]}"
+
+      - name: Refresh README preview
+        if: ${{ !contains(needs.tag.outputs.tag, '-') }}
+        run: |
+          cp "$(ls sample/*.png | sort | head -n 1)" docs/sample-resume.png
+          git add docs/sample-resume.png
+          if git diff --staged --quiet; then
+            echo "Preview unchanged."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "docs: refresh sample preview for $TAG"
+            git push origin "HEAD:${{ github.event.repository.default_branch }}"
+          fi
 
       - name: Move major version tag
         if: ${{ !contains(needs.tag.outputs.tag, '-') }}

@@ -1,15 +1,14 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/rendercv/rendercv/refs/tags/v2.6/schema.json
 #
-# Example CV for the resume toolkit. Everything here is made up.
+# Example CV for resume-builder. Everything here is made up.
 # Copy this file into your own (private) repo, rename it, and replace the content.
 # Full field reference: https://docs.rendercv.com/
 cv:
   name: Alex Rivera
   headline: Senior Mobile Engineer
   location: London, UK
-  phone: +44 20 7946 0958  # Ofcom drama range, reserved for fiction
+  phone: +44 20 7946 0958 # Ofcom drama range, reserved for fiction
   email: alex.rivera@example.com
-  website: https://example.com/
   social_networks:
     - network: GitHub
       username: example
@@ -19,14 +18,16 @@ cv:
       fontawesome_icon: linkedin
   sections:
     profile_summary:
-      - Mobile engineer with 6 years building cross-platform apps in React Native and Expo, with a focus on performance, native modules and reliable release pipelines.
+      - Mobile engineer with 7 years building cross-platform apps in React Native and Expo, from prototype to 200K+ users. Focused on performance, Swift and Kotlin native modules, and release pipelines that let teams ship weekly.
     skills:
       - label: Languages
-        details: TypeScript, JavaScript, Swift, Kotlin
+        details: TypeScript, JavaScript, Swift, Kotlin, SQL
       - label: Mobile
-        details: React Native, Expo, Expo Router, EAS Build, Native Modules
+        details: React Native, Expo, Expo Router, EAS Build & Update, Native Modules, Reanimated
+      - label: Data & State
+        details: GraphQL, REST, TanStack Query, Zustand, Redux Toolkit, SQLite, WebSockets
       - label: Tooling
-        details: Jest, Detox, GitHub Actions, Firebase
+        details: Jest, React Native Testing Library, Detox, Maestro, GitHub Actions, Firebase, Sentry
     experience:
       - company: Example Corp
         position: Senior Mobile Engineer
@@ -34,17 +35,36 @@ cv:
         end_date: present
         location: London, UK
         highlights:
-          - Led a team of 5 engineers shipping a React Native app to 200K+ monthly users
-          - Cut cold-start time by 30% by moving to the New Architecture and lazy-loading screens
-          - Automated iOS and Android releases with EAS Build and GitHub Actions
+          - Lead a team of 5 engineers shipping a React Native banking app to 200K+ monthly users with a 99.8% crash-free rate
+          - Cut cold-start time by 30% by moving to the New Architecture and lazy-loading heavy screens
+          - Automated iOS and Android releases with EAS Build and GitHub Actions, cutting release day from 4 hours to 20 min
+          - Introduced Detox and Maestro end-to-end suites that run on every pull request and block regressions before release
       - company: Sample Studio
         position: Mobile Developer
         start_date: 2019-06
         end_date: 2022-02
         location: Austin, TX
         highlights:
-          - Built 3 client apps from scratch in React Native, from design hand-off to store release
-          - Wrote Swift and Kotlin modules for background location and push notifications
+          - Built 3 client apps from scratch in React Native, from design hand-off to App Store and Google Play release
+          - Wrote Swift and Kotlin modules for background location, push notifications and in-app purchases
+          - Added offline-first sync with SQLite and a background queue, so field workers could use the app without signal
+      - company: Placeholder Labs
+        position: Junior iOS Developer
+        start_date: 2018-01
+        end_date: 2019-05
+        location: Austin, TX
+        highlights:
+          - Maintained a Swift event-ticketing app and migrated its main flows to React Native
+          - Raised unit test coverage from 20% to 65% on the checkout and payments code
+    projects:
+      - name: "[Trailmate](https://example.com/trailmate)"
+        summary: Offline hiking companion with GPS tracking and downloadable maps
+        highlights:
+          - Built map tile caching and battery-friendly location tracking in Expo, reaching 4.8 stars across 10K+ installs
+      - name: "[Splitwise Lite](https://example.com/split)"
+        summary: Expense splitting for groups, with real-time sync between devices
+        highlights:
+          - Designed a conflict-free sync model over WebSockets so edits on two phones never overwrite each other
     open_source:
       # Entries whose name links to an npm package page get a live download
       # count appended to their summary by scripts/update_npm_stats.py.
@@ -56,7 +76,7 @@ cv:
       - institution: State University
         area: Computer Science
         degree: BSc
-        end_date: 2019-05
+        end_date: 2017-05
 design:
   theme: engineeringresumes
   templates:
