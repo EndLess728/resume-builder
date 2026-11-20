@@ -12,7 +12,7 @@ The pipeline is a **reusable workflow**. Your actual CV lives in a separate (pri
 ┌───────────────────────────┐   uses   ┌─────────────────────────────────────┐
 │ your private resume repo  │ ───────▶ │ EndLess728/resume-builder           │
 │  Your_CV.yaml             │          │  .github/workflows/build-resume.yml │
-│  .github/workflows/...    │          │  scripts/                           │
+│  .github/workflows/...    │          │  actions/  (optional modules)       │
 │  secrets: Drive, Telegram │          │  example_CV.yaml                    │
 └───────────────────────────┘          └─────────────────────────────────────┘
 ```
@@ -25,11 +25,15 @@ This is [`example_CV.yaml`](./example_CV.yaml) rendered by the latest release. *
 
 ## What it does
 
-1. Adds live npm download counts to any entry that links to an npm package ([`scripts/update_npm_stats.py`](./scripts/update_npm_stats.py)).
-2. Renders the PDF (and PNG previews) with RenderCV.
-3. Uploads the PDF to Google Drive, updating the same file so the link never changes ([`scripts/upload_to_drive.py`](./scripts/upload_to_drive.py)). Optional.
-4. Saves the PDF and PNG previews as a workflow artifact and commits `rendercv_output/` back to your repo.
-5. Sends a Telegram notification ([`scripts/notify_telegram.py`](./scripts/notify_telegram.py)). Optional.
+The core renders your YAML to PDF and PNG with RenderCV, saves it as a workflow artifact, and commits `rendercv_output/` back to your repo. Everything else is an optional **module** that turns on when you set its secret:
+
+| Module                                                       | What it does                                                        |
+| ------------------------------------------------------------ | ------------------------------------------------------------------- |
+| [npm-download-stats](./actions/npm-download-stats/)          | Adds live npm download counts to entries that link to an npm package. On by default. |
+| [google-drive-upload](./actions/google-drive-upload/)        | Keeps the PDF on Google Drive behind one link that never changes.   |
+| [telegram-notify](./actions/telegram-notify/)                | Messages you when the resume is built, or when a build fails, optionally with the PDF. |
+
+Modules are plain composite actions, so you can also use them in other workflows. Want another one, like Slack or email? [Adding a module](./CONTRIBUTING.md#adding-a-module) takes a template and four small edits.
 
 ## Use it for your own resume
 
@@ -65,16 +69,27 @@ Push, and the resume builds.
 
 ### Inputs
 
-| Input                | Default  | Description                                                                         |
-| -------------------- | -------- | ----------------------------------------------------------------------------------- |
-| `cv_file`            | required | Path to your RenderCV YAML.                                                         |
-| `update_npm_stats`   | `true`   | Append live npm download counts to entries linking to npm packages.                 |
-| `commit_output`      | `true`   | Commit `rendercv_output/` back to your repo.                                        |
-| `upload_artifact`    | `true`   | Save the PDF and PNG previews as a workflow artifact.                               |
-| `artifact_name`      | `resume` | Name of that artifact.                                                              |
-| `rendercv_version`   | `>=2.6`  | pip version specifier for RenderCV.                                                 |
-| `toolkit_repository` | auto     | Where the scripts come from. Defaults to the repo you called the workflow from.     |
-| `toolkit_ref`        | auto     | Version of the scripts. Defaults to the exact commit of the workflow you pinned.    |
+| Input                        | Default  | Description                                                                      |
+| ---------------------------- | -------- | -------------------------------------------------------------------------------- |
+| `cv_file`                    | required | Path to your RenderCV YAML.                                                      |
+| `commit_output`              | `true`   | Commit `rendercv_output/` back to your repo.                                     |
+| `upload_artifact`            | `true`   | Save the PDF and PNG previews as a workflow artifact.                            |
+| `artifact_name`              | `resume` | Name of that artifact.                                                           |
+| `rendercv_version`           | `>=2.6`  | pip version specifier for RenderCV.                                              |
+| `update_npm_stats`           | `true`   | **npm-download-stats:** add live download counts.                                |
+| `telegram_send_pdf`          | `false`  | **telegram-notify:** attach the PDF to the success message.                      |
+| `telegram_notify_on_failure` | `true`   | **telegram-notify:** also send a message when the build fails.                   |
+| `toolkit_repository`         | auto     | Where the modules come from. Defaults to the repo you called the workflow from.  |
+| `toolkit_ref`                | auto     | Version of the modules. Defaults to the exact commit of the workflow you pinned. |
+
+### Outputs
+
+| Output      | Description                                                       |
+| ----------- | ----------------------------------------------------------------- |
+| `pdf_path`  | Path of the rendered PDF.                                         |
+| `drive_url` | Google Drive link to the PDF. Empty when the Drive module is off. |
+
+Use them from a job that `needs:` the build job, for example to post the link somewhere else.
 
 ### Versioning
 
@@ -87,21 +102,21 @@ Releases follow [Semantic Versioning](https://semver.org/) and are listed in the
 | `@<commit-sha>`          | Exactly that commit. The safest choice for strict supply-chain rules. |
 | `@main`                  | Unreleased changes. May break.                                    |
 
-The workflow always loads its scripts from the same commit as the workflow file you pinned, so the workflow and scripts can't drift apart.
+The workflow always loads its modules from the same commit as the workflow file you pinned, so the two can't drift apart.
 
 ### Secrets
 
-All optional. Steps whose secrets are missing are skipped.
+All optional. A module whose secrets are missing is skipped.
 
 | Secret                     | Value                                                                                                                         |
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `GOOGLE_DRIVE_CREDENTIALS` | The entire contents of a Google Cloud service-account JSON key. Enables the Drive upload.                                      |
+| `GOOGLE_DRIVE_CREDENTIALS` | The entire contents of a Google Cloud service-account JSON key. Turns on **google-drive-upload**.                              |
 | `GOOGLE_DRIVE_FILE_ID`     | ID of the existing PDF in Drive (`https://drive.google.com/file/d/<FILE_ID>/view`). Updated in place, so the link stays fixed. |
 | `GOOGLE_DRIVE_FOLDER_ID`   | Drive folder to create the file in. Only used when `GOOGLE_DRIVE_FILE_ID` is not set.                                          |
-| `TELEGRAM_BOT_TOKEN`       | Bot token from [@BotFather](https://t.me/BotFather).                                                                          |
+| `TELEGRAM_BOT_TOKEN`       | Bot token from [@BotFather](https://t.me/BotFather). With the chat ID, turns on **telegram-notify**.                           |
 | `TELEGRAM_CHAT_ID`         | Chat to notify. Message your bot, then read `chat.id` from `https://api.telegram.org/bot<TOKEN>/getUpdates`.                  |
 
-The one-time Google setup (service account, sharing the file with it) is walked through in [`docs/GOOGLE_DRIVE_SETUP.md`](./docs/GOOGLE_DRIVE_SETUP.md).
+The one-time Google setup (service account, sharing the file with it) is walked through in [`actions/google-drive-upload/SETUP.md`](./actions/google-drive-upload/SETUP.md).
 
 > **Keep the CV repo private.** If you call this from a public repo, set `upload_artifact: false` and `commit_output: false`, since anyone can download artifacts and read commits there.
 
@@ -116,17 +131,9 @@ rendercv render --watch example_CV.yaml  # re-render on save
 
 Output goes to `rendercv_output/`. If `rendercv --version` shows something older than 2.6, check `which -a rendercv` for a stale pip install shadowing the pipx one.
 
-## Development
+## Contributing
 
-[`ci.yml`](./.github/workflows/ci.yml) runs the reusable workflow against `example_CV.yaml` on every push and pull request, so changes are tested end to end.
-
-To release, add the changes to [`CHANGELOG.md`](./CHANGELOG.md), then either run **Actions → Release → Run workflow** with a version like `v1.1.0`, or push the tag yourself:
-
-```bash
-git tag v1.1.0 && git push origin v1.1.0
-```
-
-[`release.yml`](./.github/workflows/release.yml) renders the sample with that exact version, publishes a GitHub release with `sample-resume.pdf` attached, refreshes the README preview image, and moves the `v1` tag to it. Tags with a suffix, like `v1.1.0-rc.1`, become pre-releases and don't move `v1`.
+Pull requests are welcome. [CONTRIBUTING.md](./CONTRIBUTING.md) explains how the pipeline is laid out, how to add a module, how to test with your own secrets from a fork, and how releases work. [`ci.yml`](./.github/workflows/ci.yml) lints every pull request and renders `example_CV.yaml` through the real pipeline.
 
 ## License
 

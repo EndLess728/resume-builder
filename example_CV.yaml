@@ -67,7 +67,7 @@ cv:
           - Designed a conflict-free sync model over WebSockets so edits on two phones never overwrite each other
     open_source:
       # Entries whose name links to an npm package page get a live download
-      # count appended to their summary by scripts/update_npm_stats.py.
+      # count appended to their summary by the npm-download-stats module.
       - name: "[left-pad](https://www.npmjs.com/package/left-pad)"
         summary: String left pad, used here only to demo the npm download counter
         highlights:

@@ -1,0 +1,48 @@
+# Template for a new resume-builder module.
+# Copy this folder to actions/<your-module-name>/ and replace every TODO.
+# See CONTRIBUTING.md → "Adding a module" for the full walkthrough.
+
+name: TODO Module name
+description: TODO One sentence on what this module does.
+author: TODO your GitHub username
+
+# Stage: TODO pre-render | publish | notify
+
+inputs:
+  file:
+    description: Path of the rendered PDF (publish/notify modules). Pre-render modules usually take cv_file instead.
+    required: true
+  token:
+    description: TODO Secret your service needs. Passed in by build-resume.yml from a repo secret.
+    required: true
+  # Add settings with sensible defaults so most users never need to set them.
+  example_option:
+    description: TODO What this option changes
+    required: false
+    default: ""
+
+# Expose anything a later module might want, like a URL.
+outputs:
+  url:
+    description: TODO e.g. where the file was published
+    value: ${{ steps.run.outputs.url }}
+
+runs:
+  using: composite
+  steps:
+    # Only needed if your script uses third-party packages. Prefer the
+    # standard library; if you do need packages, install them here so users
+    # who don't enable the module don't pay for them.
+    # - name: Install dependencies
+    #   shell: bash
+    #   run: python3 -m pip install --quiet --disable-pip-version-check some-package
+
+    - name: Run module
+      id: run
+      shell: bash
+      env:
+        FILE: ${{ inputs.file }}
+        TOKEN: ${{ inputs.token }}
+        EXAMPLE_OPTION: ${{ inputs.example_option }}
+      # Always call scripts through $GITHUB_ACTION_PATH.
+      run: python3 "$GITHUB_ACTION_PATH/run.py" "$FILE"

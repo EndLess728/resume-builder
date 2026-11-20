@@ -1,0 +1,48 @@
+name: Google Drive upload
+description: Upload a file to Google Drive with a service account, updating one file in place so its link never changes.
+author: EndLess728
+
+# Stage: publish. Runs after the PDF is rendered.
+
+inputs:
+  file:
+    description: Path of the file to upload
+    required: true
+  credentials:
+    description: Full contents of a Google Cloud service-account JSON key
+    required: true
+  file_id:
+    description: ID of an existing Drive file to update in place (recommended, keeps the link stable)
+    required: false
+    default: ""
+  folder_id:
+    description: Drive folder to create a new, publicly readable file in. Used only when file_id is empty.
+    required: false
+    default: ""
+
+outputs:
+  url:
+    description: View URL of the uploaded file
+    value: ${{ steps.upload.outputs.url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Install Google API client
+      shell: bash
+      run: python -m pip install --quiet --disable-pip-version-check google-api-python-client google-auth
+
+    - name: Upload to Google Drive
+      id: upload
+      shell: bash
+      env:
+        FILE: ${{ inputs.file }}
+        GOOGLE_DRIVE_CREDENTIALS: ${{ inputs.credentials }}
+        GOOGLE_DRIVE_FILE_ID: ${{ inputs.file_id }}
+        GOOGLE_DRIVE_FOLDER_ID: ${{ inputs.folder_id }}
+      run: python "$GITHUB_ACTION_PATH/upload_to_drive.py" "$FILE"

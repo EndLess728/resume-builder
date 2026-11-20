@@ -1,0 +1,42 @@
+name: Telegram notify
+description: Send a Telegram message about a build, optionally with the PDF attached. Never fails the build.
+author: EndLess728
+
+# Stage: notify. Runs last, on success or on failure.
+
+inputs:
+  bot_token:
+    description: Telegram bot token from @BotFather
+    required: true
+  chat_id:
+    description: Chat to send the message to
+    required: true
+  status:
+    description: "Build result: success or failure"
+    required: false
+    default: success
+  drive_url:
+    description: Link to the published PDF. Left out of the message when empty.
+    required: false
+    default: ""
+  document:
+    description: Path to a PDF to attach (successful builds only). Empty sends a text message.
+    required: false
+    default: ""
+
+runs:
+  using: composite
+  steps:
+    - name: Send Telegram notification
+      shell: bash
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ inputs.bot_token }}
+        TELEGRAM_CHAT_ID: ${{ inputs.chat_id }}
+        STATUS: ${{ inputs.status }}
+        DRIVE_URL: ${{ inputs.drive_url }}
+        DOCUMENT: ${{ inputs.document }}
+        REPO: ${{ github.repository }}
+        COMMIT_SHA: ${{ github.sha }}
+        ACTOR: ${{ github.actor }}
+        RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+      run: python3 "$GITHUB_ACTION_PATH/notify_telegram.py"

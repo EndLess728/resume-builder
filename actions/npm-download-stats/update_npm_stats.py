@@ -11,7 +11,7 @@ gets its `summary` line rewritten to end with "(12.3K+ downloads)". An existing
 "(... downloads)" suffix is replaced, so the script is safe to run repeatedly.
 No configuration or API key is needed; it uses the public npm downloads API.
 
-Usage: python3 scripts/update_npm_stats.py <cv.yaml>
+Usage: python3 update_npm_stats.py <cv.yaml>
 """
 
 import json
@@ -84,7 +84,7 @@ def update_yaml(path: Path) -> int:
 
 def main() -> int:
     if len(sys.argv) != 2:
-        print("Usage: python3 scripts/update_npm_stats.py <cv.yaml>")
+        print("Usage: python3 update_npm_stats.py <cv.yaml>")
         return 1
     path = Path(sys.argv[1])
     if not path.exists():

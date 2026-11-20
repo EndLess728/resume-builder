@@ -4,6 +4,28 @@ All notable changes to this project are documented here. The project follows
 [Semantic Versioning](https://semver.org/): pin `@v1` for compatible updates,
 or an exact tag such as `@v1.0.0` for a fixed version.
 
+## [Unreleased]
+
+## [1.1.0] - 2026-11-20
+
+### Added
+
+- Optional features are now **modules**: composite actions in `actions/` (`npm-download-stats`, `google-drive-upload`, `telegram-notify`), each with its own README. They also work on their own in any workflow.
+- `drive_url` workflow output with the Drive link to the PDF.
+- `telegram_send_pdf` input to attach the PDF to the Telegram message.
+- `telegram_notify_on_failure` input (default `true`): Telegram tells you when a build fails, with a link to the run.
+- `CONTRIBUTING.md`, a module template in `docs/module-template/`, and a pull request template.
+- CI lints workflows, checks each module has `action.yml` and `README.md`, and compiles the Python.
+
+### Fixed
+
+- The Telegram message only links to Google Drive when the upload actually ran, using the real file URL. Before, it linked to `GOOGLE_DRIVE_FILE_ID` even when the upload was skipped or created a new file.
+
+### Changed
+
+- `scripts/` moved into the module folders, and the Drive setup guide moved to `actions/google-drive-upload/SETUP.md`.
+- Callers need no changes.
+
 ## [1.0.1] - 2026-11-20
 
 ### Changed
@@ -24,5 +46,6 @@ First public release.
 - The workflow loads its scripts from its own commit, so a pinned version always runs matching scripts.
 - `example_CV.yaml`, rendered and attached to every release as a sample.
 
+[1.1.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.1.0
 [1.0.1]: https://github.com/EndLess728/resume-builder/releases/tag/v1.0.1
 [1.0.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.0.0
