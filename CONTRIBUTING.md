@@ -104,7 +104,7 @@ Most module scripts can also run on their own; each module README has a "Run loc
 **End to end, with real secrets.** CI can't test modules that need secrets, so try them from your fork:
 
 1. Push your branch to your fork, e.g. `you/resume-builder@slack-notify`.
-2. In a private test repo holding a CV YAML, point the caller at your branch and add the module's secrets there:
+2. Create a private test repo from [resume-builder-template](https://github.com/EndLess728/resume-builder-template) (**Use this template**). In its `.github/workflows/resume.yml`, point the caller at your branch, then add the module's secrets to that repo:
    ```yaml
    uses: you/resume-builder/.github/workflows/build-resume.yml@slack-notify
    ```
