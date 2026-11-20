@@ -149,7 +149,7 @@ jobs:
         id: render
         run: |
           rendercv render "$CV_FILE"
-          pdf=$(ls -t rendercv_output/*.pdf | head -n 1)
+          pdf=$(find rendercv_output -maxdepth 1 -name '*.pdf' -printf '%T@ %p\n' | sort -nr | head -n 1 | cut -d' ' -f2-)
           echo "Rendered $pdf"
           echo "pdf_path=$pdf" >> "$GITHUB_OUTPUT"
 
