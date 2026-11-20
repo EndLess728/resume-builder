@@ -1,16 +1,16 @@
-# MyResume — a RenderCV resume pipeline
+# resume-builder
 
 Write your resume as YAML, and let GitHub Actions turn it into a PDF, keep it up to date on Google Drive behind one permanent link, and ping you on Telegram when it's done. Built on [RenderCV](https://github.com/rendercv/rendercv).
 
 The pipeline is a **reusable workflow**. Your actual CV lives in a separate (private) repo that calls it. That keeps your phone number, email and generated PDFs out of public view: logs, artifacts and commits all happen in your private repo, while the code lives here in one place.
 
 ```
-┌───────────────────────────┐   uses   ┌──────────────────────────────────┐
-│ your-private-resume repo  │ ───────▶ │ EndLess728/MyResume (this repo)  │
-│  Your_CV.yaml             │          │  .github/workflows/build-resume  │
-│  .github/workflows/...    │          │  scripts/                        │
-│  secrets: Drive, Telegram │          │  example_CV.yaml                 │
-└───────────────────────────┘          └──────────────────────────────────┘
+┌───────────────────────────┐   uses   ┌─────────────────────────────────────┐
+│ your private resume repo  │ ───────▶ │ EndLess728/resume-builder           │
+│  Your_CV.yaml             │          │  .github/workflows/build-resume.yml │
+│  .github/workflows/...    │          │  scripts/                           │
+│  secrets: Drive, Telegram │          │  example_CV.yaml                    │
+└───────────────────────────┘          └─────────────────────────────────────┘
 ```
 
 ## What it does
@@ -43,7 +43,7 @@ permissions:
 
 jobs:
   build:
-    uses: EndLess728/MyResume/.github/workflows/build-resume.yml@main
+    uses: EndLess728/resume-builder/.github/workflows/build-resume.yml@main
     with:
       cv_file: Jane_Doe_CV.yaml
     secrets: inherit
@@ -62,7 +62,7 @@ Push, and the resume builds. For a stable setup, pin `@main` to a tag or commit 
 | `commit_output`      | `true`                | Commit `rendercv_output/` back to your repo.                        |
 | `upload_artifact`    | `true`                | Save the PDF as a `resume-pdf` artifact.                            |
 | `rendercv_version`   | `>=2.6`               | pip version specifier for RenderCV.                                 |
-| `toolkit_repository` | `EndLess728/MyResume` | Where the scripts come from. Set this if you fork the toolkit.      |
+| `toolkit_repository` | `EndLess728/resume-builder` | Where the scripts come from. Set this if you fork the toolkit.      |
 | `toolkit_ref`        | `main`                | Branch, tag or SHA of the toolkit to use.                           |
 
 ### Secrets
