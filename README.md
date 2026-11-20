@@ -21,7 +21,7 @@ The pipeline is a **reusable workflow**. Your actual CV lives in a separate (pri
 
 This is [`example_CV.yaml`](./example_CV.yaml) rendered by the latest release. **[Download the sample PDF](https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume.pdf)**
 
-<a href="https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume.pdf"><img src="https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume-page-1.png" alt="Sample resume, page 1" width="600"></a>
+<a href="https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume.pdf"><img src="./docs/sample-resume.png" alt="Sample resume" width="600"></a>
 
 ## What it does
 
@@ -126,7 +126,7 @@ To release, add the changes to [`CHANGELOG.md`](./CHANGELOG.md), then either run
 git tag v1.1.0 && git push origin v1.1.0
 ```
 
-[`release.yml`](./.github/workflows/release.yml) renders the sample with that exact version, publishes a GitHub release with `sample-resume.pdf` and PNG previews attached, and moves the `v1` tag to it. Tags with a suffix, like `v1.1.0-rc.1`, become pre-releases and don't move `v1`.
+[`release.yml`](./.github/workflows/release.yml) renders the sample with that exact version, publishes a GitHub release with `sample-resume.pdf` attached, refreshes the README preview image, and moves the `v1` tag to it. Tags with a suffix, like `v1.1.0-rc.1`, become pre-releases and don't move `v1`.
 
 ## License
 
