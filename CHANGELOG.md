@@ -6,6 +6,10 @@ or an exact tag such as `@v1.0.0` for a fixed version.
 
 ## [Unreleased]
 
+### Fixed
+
+- Removed the "Node.js 20 is deprecated" warnings by updating to `actions/checkout@v7`, `actions/setup-python@v7`, `actions/upload-artifact@v7` and `actions/download-artifact@v8`, which run on Node.js 24.
+
 ### Added
 
 - [resume-builder-template](https://github.com/EndLess728/resume-builder-template), a ready-made repo to start from with **Use this template**. The README's setup steps now use it, with the manual workflow kept as a fallback.
