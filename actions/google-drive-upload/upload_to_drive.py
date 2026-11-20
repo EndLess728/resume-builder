@@ -5,7 +5,10 @@ Updates GOOGLE_DRIVE_FILE_ID in place when set (keeping the shareable link
 stable), otherwise creates the file in GOOGLE_DRIVE_FOLDER_ID and makes it
 publicly readable.
 
-Usage: python3 scripts/upload_to_drive.py <pdf_path>
+When run inside GitHub Actions, the file's view URL is written to the step
+output `url` so later steps (like telegram-notify) can link to it.
+
+Usage: python3 upload_to_drive.py <pdf_path>
 """
 
 import json
@@ -21,9 +24,17 @@ from googleapiclient.http import MediaFileUpload  # type: ignore[import-not-foun
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 
+def set_output(name: str, value: str) -> None:
+    """Expose a value to later workflow steps (no-op outside GitHub Actions)."""
+    output_file = os.environ.get("GITHUB_OUTPUT")
+    if output_file:
+        with open(output_file, "a") as f:
+            f.write(f"{name}={value}\n")
+
+
 def main() -> int:
     if len(sys.argv) != 2:
-        print("Usage: python3 scripts/upload_to_drive.py <pdf_path>")
+        print("Usage: python3 upload_to_drive.py <pdf_path>")
         return 1
     pdf = Path(sys.argv[1])
     if not pdf.exists():
@@ -49,7 +60,9 @@ def main() -> int:
         if file_id:
             # UPDATE existing file (keeps same link!)
             service.files().update(fileId=file_id, media_body=media).execute()
-            print(f"✅ Updated existing file: https://drive.google.com/file/d/{file_id}/view")
+            url = f"https://drive.google.com/file/d/{file_id}/view"
+            print(f"✅ Updated existing file: {url}")
+            set_output("url", url)
         else:
             # CREATE new file (first time only)
             file = service.files().create(
@@ -66,7 +79,9 @@ def main() -> int:
 
             print("✅ Created new file! Add this FILE_ID to GitHub secrets:")
             print(f"   {new_file_id}")
-            print(f"📎 Shareable link: https://drive.google.com/file/d/{new_file_id}/view")
+            url = f"https://drive.google.com/file/d/{new_file_id}/view"
+            print(f"📎 Shareable link: {url}")
+            set_output("url", url)
     except HttpError as e:
         if e.resp.status == 404:
             print(f"❌ ERROR: File not found (ID: {file_id})")

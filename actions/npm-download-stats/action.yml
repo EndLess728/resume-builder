@@ -1,0 +1,19 @@
+name: npm download stats
+description: Append live npm download counts to resume entries that link to an npm package.
+author: EndLess728
+
+# Stage: pre-render. Edits the CV YAML in place before RenderCV runs.
+
+inputs:
+  cv_file:
+    description: Path to the RenderCV YAML to update
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Update npm download counts
+      shell: bash
+      env:
+        CV_FILE: ${{ inputs.cv_file }}
+      run: python3 "$GITHUB_ACTION_PATH/update_npm_stats.py" "$CV_FILE"

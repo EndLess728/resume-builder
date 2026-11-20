@@ -3,6 +3,18 @@ name: Build Resume (reusable)
 # Reusable workflow: call it from the repo that holds your CV YAML (ideally a
 # private one). It runs in the caller's repo, so logs, artifacts and generated
 # files stay wherever your CV lives. See README.md for a ready-made caller.
+#
+# The job runs in stages. Optional features are modules in actions/<name>/,
+# each a composite action that turns itself on when its input or secret is set:
+#
+#   1. Setup        check out the CV repo and this toolkit (at this exact commit)
+#   2. Pre-render   modules that edit the CV YAML   → npm-download-stats
+#   3. Render       RenderCV turns the YAML into PDF + PNG
+#   4. Publish      modules that ship the PDF       → google-drive-upload
+#   5. Save         workflow artifact, commit rendercv_output/
+#   6. Notify       modules that report the result  → telegram-notify
+#
+# Adding a module? See CONTRIBUTING.md.
 
 on:
   workflow_call:
@@ -11,20 +23,12 @@ on:
         description: Path to the RenderCV YAML in the calling repo
         type: string
         required: true
-      toolkit_repository:
-        description: Repo to load the scripts from. Defaults to the repo this workflow was called from, so you rarely need it.
-        type: string
-        default: ""
-      toolkit_ref:
-        description: Ref to load the scripts from. Defaults to the exact commit of this workflow, so @v1.0.0 uses v1.0.0's scripts.
-        type: string
-        default: ""
       rendercv_version:
         description: pip version specifier for RenderCV
         type: string
         default: ">=2.6"
       update_npm_stats:
-        description: Add live npm download counts to entries that link to npm packages
+        description: "[npm-download-stats] Add live npm download counts to entries that link to npm packages"
         type: boolean
         default: true
       commit_output:
@@ -39,63 +43,108 @@ on:
         description: Name of the workflow artifact
         type: string
         default: resume
+      telegram_send_pdf:
+        description: "[telegram-notify] Attach the PDF to the Telegram message instead of sending text only"
+        type: boolean
+        default: false
+      telegram_notify_on_failure:
+        description: "[telegram-notify] Also send a message when the build fails"
+        type: boolean
+        default: true
+      toolkit_repository:
+        description: Repo to load the modules from. Defaults to the repo this workflow was called from, so you rarely need it.
+        type: string
+        default: ""
+      toolkit_ref:
+        description: Ref to load the modules from. Defaults to the exact commit of this workflow, so @v1.0.0 uses v1.0.0's modules.
+        type: string
+        default: ""
     secrets:
       GOOGLE_DRIVE_CREDENTIALS:
+        description: "[google-drive-upload] Service-account JSON key. Enables the module."
         required: false
       GOOGLE_DRIVE_FILE_ID:
+        description: "[google-drive-upload] Existing file to update in place"
         required: false
       GOOGLE_DRIVE_FOLDER_ID:
+        description: "[google-drive-upload] Folder to create the file in when no file ID is set"
         required: false
       TELEGRAM_BOT_TOKEN:
+        description: "[telegram-notify] Bot token. Enables the module together with TELEGRAM_CHAT_ID."
         required: false
       TELEGRAM_CHAT_ID:
+        description: "[telegram-notify] Chat to notify"
         required: false
     outputs:
       pdf_path:
         description: Path of the rendered PDF in the calling repo
         value: ${{ jobs.build.outputs.pdf_path }}
+      drive_url:
+        description: Google Drive view URL of the PDF (empty when the Drive module is off)
+        value: ${{ jobs.build.outputs.drive_url }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
       pdf_path: ${{ steps.render.outputs.pdf_path }}
+      drive_url: ${{ steps.drive.outputs.url }}
     env:
-      TOOLKIT: .resume-toolkit
       CV_FILE: ${{ inputs.cv_file }}
 
     steps:
+      # ── 1. Setup ──────────────────────────────────────────────────────────
       - name: Checkout CV repository
         uses: actions/checkout@v4
 
       # job.workflow_* describe this reusable workflow itself (not the caller),
-      # so the scripts always match the version the caller pinned.
+      # so the modules always match the version the caller pinned. Modules are
+      # then used from this checkout as ./.resume-toolkit/actions/<name>.
       - name: Checkout resume toolkit
         uses: actions/checkout@v4
         with:
           repository: ${{ inputs.toolkit_repository || job.workflow_repository || 'EndLess728/resume-builder' }}
           ref: ${{ inputs.toolkit_ref || job.workflow_sha || 'main' }}
-          path: ${{ env.TOOLKIT }}
+          path: .resume-toolkit
 
       - name: Show toolkit version
-        run: echo "resume-builder toolkit at $(git -C "$TOOLKIT" rev-parse HEAD) ($(git -C "$TOOLKIT" describe --tags --always 2>/dev/null || true))"
+        run: echo "resume-builder toolkit at $(git -C .resume-toolkit rev-parse HEAD)"
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
-      - name: Install dependencies
+      - name: Install RenderCV
         env:
           RENDERCV_VERSION: ${{ inputs.rendercv_version }}
+        run: pip install "rendercv[full]${RENDERCV_VERSION}"
+
+      # Decide once which modules are on, so each step's `if` stays readable.
+      - name: Detect enabled modules
+        id: modules
+        env:
+          GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          pip install "rendercv[full]${RENDERCV_VERSION}"
-          pip install google-api-python-client google-auth
+          enable() { echo "$1=true" >> "$GITHUB_OUTPUT"; echo "✅ $1"; }
+          skip()   { echo "⏭️  $1 ($2)"; }
 
-      - name: Update npm download stats
+          if [ -n "$GOOGLE_DRIVE_CREDENTIALS" ]; then enable drive
+          else skip drive "GOOGLE_DRIVE_CREDENTIALS not set"; fi
+
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then enable telegram
+          else skip telegram "TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set"; fi
+
+      # ── 2. Pre-render modules ─────────────────────────────────────────────
+      - name: "[module] npm download stats"
         if: inputs.update_npm_stats
-        run: python3 "$TOOLKIT/scripts/update_npm_stats.py" "$CV_FILE"
+        uses: ./.resume-toolkit/actions/npm-download-stats
+        with:
+          cv_file: ${{ inputs.cv_file }}
 
+      # ── 3. Render ─────────────────────────────────────────────────────────
       - name: Render resume
         id: render
         run: |
@@ -104,33 +153,19 @@ jobs:
           echo "Rendered $pdf"
           echo "pdf_path=$pdf" >> "$GITHUB_OUTPUT"
 
-      - name: Check optional integrations
-        id: config
-        env:
-          GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        run: |
-          if [ -n "$GOOGLE_DRIVE_CREDENTIALS" ]; then
-            echo "drive=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "GOOGLE_DRIVE_CREDENTIALS not set; skipping Drive upload."
-          fi
-          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
-            echo "telegram=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Telegram secrets not set; skipping notification."
-          fi
+      # ── 4. Publish modules ────────────────────────────────────────────────
+      - name: "[module] Google Drive upload"
+        id: drive
+        if: steps.modules.outputs.drive == 'true'
+        uses: ./.resume-toolkit/actions/google-drive-upload
+        with:
+          file: ${{ steps.render.outputs.pdf_path }}
+          credentials: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+          file_id: ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
+          folder_id: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
 
-      - name: Upload to Google Drive
-        if: steps.config.outputs.drive == 'true'
-        env:
-          GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
-          GOOGLE_DRIVE_FILE_ID: ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
-          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-        run: python3 "$TOOLKIT/scripts/upload_to_drive.py" "${{ steps.render.outputs.pdf_path }}"
-
-      - name: Upload PDF artifact
+      # ── 5. Save ───────────────────────────────────────────────────────────
+      - name: Upload artifact
         if: inputs.upload_artifact
         uses: actions/upload-artifact@v4
         with:
@@ -148,13 +183,21 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: auto-generate resume PDF"
           git push
 
-      - name: Send Telegram notification
-        if: steps.config.outputs.telegram == 'true'
-        env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-          DRIVE_FILE_ID: ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
-          REPO: ${{ github.repository }}
-          COMMIT_SHA: ${{ github.sha }}
-          ACTOR: ${{ github.actor }}
-        run: python3 "$TOOLKIT/scripts/notify_telegram.py"
+      # ── 6. Notify modules ─────────────────────────────────────────────────
+      - name: "[module] Telegram notify"
+        if: success() && steps.modules.outputs.telegram == 'true'
+        uses: ./.resume-toolkit/actions/telegram-notify
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: success
+          drive_url: ${{ steps.drive.outputs.url }}
+          document: ${{ inputs.telegram_send_pdf && steps.render.outputs.pdf_path || '' }}
+
+      - name: "[module] Telegram notify (failure)"
+        if: failure() && inputs.telegram_notify_on_failure && steps.modules.outputs.telegram == 'true'
+        uses: ./.resume-toolkit/actions/telegram-notify
+        with:
+          bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
+          status: failure
