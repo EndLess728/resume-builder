@@ -1,0 +1,22 @@
+name: CI
+
+# Renders example_CV.yaml through the reusable workflow, using this commit's
+# scripts, so every change to the toolkit is tested end to end.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  example:
+    uses: ./.github/workflows/build-resume.yml
+    with:
+      cv_file: example_CV.yaml
+      toolkit_repository: ${{ github.repository }}
+      toolkit_ref: ${{ github.sha }}
+      commit_output: false
