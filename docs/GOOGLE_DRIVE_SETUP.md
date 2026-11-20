@@ -4,7 +4,9 @@ description: Generate resume PDF and upload to Google Drive with a permanent sha
 
 # Resume Generation & Google Drive Upload Workflow
 
-This workflow generates the resume PDF and uploads it to Google Drive, ensuring the **file link remains the same** for portfolio use.
+The [`Generate & Upload Resume PDF`](../.github/workflows/generate-and-upload-resume.yml) workflow renders the resume and uploads it to Google Drive with [`scripts/upload_to_drive.py`](../scripts/upload_to_drive.py). It updates the same Drive file every time, so the **link stays the same** and can be used in a portfolio.
+
+This guide covers the one-time Google setup. For the full list of pipeline secrets (including the optional Telegram ones), see the **CI Pipeline** section of the [README](../README.md).
 
 ## Prerequisites
 
@@ -28,147 +30,36 @@ This workflow generates the resume PDF and uploads it to Google Drive, ensuring 
    - Click on the service account you just created
    - Go to `Keys` tab → `Add Key` → `Create new key`
    - Choose JSON format
-   - Download the JSON file (keep it safe!)
+   - Download the JSON file (keep it safe, and never commit it)
 
-### 2. Create a Folder in Google Drive
+The service account's email (the `client_email` field in the JSON, e.g. `resume-uploader@your-project.iam.gserviceaccount.com`) is what you share Drive items with below.
 
-1. Go to [Google Drive](https://drive.google.com/)
-2. Create a folder called `Resume` (or any name you prefer)
-3. Right-click the folder → `Share`
-4. Share with the service account email (looks like: `resume-uploader@your-project.iam.gserviceaccount.com`)
-5. Give **Editor** permission
-6. Copy the folder ID from the URL: `https://drive.google.com/drive/folders/YOUR_FOLDER_ID`
+### 2. Upload the Resume and Share It (One-time Setup)
 
-### 3. Initial Upload (One-time Setup)
+1. Render the PDF locally (`rendercv render Mantu_CV.yaml`) and upload `rendercv_output/Mantu_CV.pdf` to [Google Drive](https://drive.google.com/).
+2. Right-click the file → `Share`:
+   - Add the service account email with **Editor** permission (without this, the upload fails with `File not found`)
+   - Under `General access`, choose `Anyone with the link` → `Viewer`
+3. Copy the file ID from the URL: `https://drive.google.com/file/d/YOUR_FILE_ID/view`. **This ID is what keeps the link permanent.**
 
-Upload your resume manually to the folder first, then:
+> **Why update an existing file instead of letting the script create one?** Service accounts have no Drive storage quota of their own, so creating a file in a personal (non-shared) Drive folder can be rejected. Updating a file you own works, and it keeps the same link.
 
-1. Right-click the file → `Get Link` → `Anyone with the link`
-2. Copy the file ID from the URL: `https://drive.google.com/file/d/YOUR_FILE_ID/view`
-3. Save this file ID - **this is what keeps the link permanent!**
+### 3. (Optional) Folder Fallback
+
+If `GOOGLE_DRIVE_FILE_ID` is not set, the script instead creates a new file in a folder and makes it public. It prints the new file ID, which you should then save as `GOOGLE_DRIVE_FILE_ID`. To use this path:
+
+1. Create a folder in Drive and share it with the service account email (**Editor**)
+2. Copy the folder ID from the URL: `https://drive.google.com/drive/folders/YOUR_FOLDER_ID`
 
 ### 4. Add GitHub Secrets
 
 Go to your GitHub repository → `Settings` → `Secrets and variables` → `Actions`:
 
-| Secret Name                | Value                                |
-| -------------------------- | ------------------------------------ |
-| `GOOGLE_DRIVE_CREDENTIALS` | Entire contents of the JSON key file |
-| `GOOGLE_DRIVE_FILE_ID`     | The file ID from step 3              |
-| `GOOGLE_DRIVE_FOLDER_ID`   | The folder ID from step 2            |
-
----
-
-## GitHub Actions Workflow
-
-Replace your `.github/workflows/generate-resume.yml` with:
-
-```yaml
-name: Generate Resume PDF
-
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - "Mantu_CV.yaml"
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: |
-          pip install "rendercv[full]"
-          pip install google-api-python-client google-auth
-
-      - name: Generate Resume PDF
-        run: rendercv render Mantu_CV.yaml
-
-      - name: Upload to Google Drive
-        env:
-          GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
-          GOOGLE_DRIVE_FILE_ID: ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
-          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
-        run: |
-          python << 'EOF'
-          import os
-          import json
-          from google.oauth2 import service_account
-          from googleapiclient.discovery import build
-          from googleapiclient.http import MediaFileUpload
-
-          # Load credentials from environment
-          creds_json = os.environ['GOOGLE_DRIVE_CREDENTIALS']
-          creds_dict = json.loads(creds_json)
-
-          credentials = service_account.Credentials.from_service_account_info(
-              creds_dict,
-              scopes=['https://www.googleapis.com/auth/drive.file']
-          )
-
-          service = build('drive', 'v3', credentials=credentials)
-
-          file_id = os.environ.get('GOOGLE_DRIVE_FILE_ID')
-          folder_id = os.environ.get('GOOGLE_DRIVE_FOLDER_ID')
-          file_path = 'rendercv_output/Mantu_CV.pdf'
-
-          media = MediaFileUpload(file_path, mimetype='application/pdf', resumable=True)
-
-          if file_id:
-              # UPDATE existing file (keeps same link!)
-              file = service.files().update(
-                  fileId=file_id,
-                  media_body=media
-              ).execute()
-              print(f"✅ Updated existing file: https://drive.google.com/file/d/{file_id}/view")
-          else:
-              # CREATE new file (first time only)
-              file_metadata = {
-                  'name': 'Mantu_CV.pdf',
-                  'parents': [folder_id]
-              }
-              file = service.files().create(
-                  body=file_metadata,
-                  media_body=media,
-                  fields='id'
-              ).execute()
-              new_file_id = file.get('id')
-              
-              # Make it publicly accessible
-              service.permissions().create(
-                  fileId=new_file_id,
-                  body={'type': 'anyone', 'role': 'reader'}
-              ).execute()
-              
-              print(f"✅ Created new file! Add this FILE_ID to GitHub secrets: {new_file_id}")
-              print(f"📎 Shareable link: https://drive.google.com/file/d/{new_file_id}/view")
-          EOF
-
-      - name: Upload PDF artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: resume-pdf
-          path: rendercv_output/Mantu_CV.pdf
-
-      - name: Commit generated files
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add rendercv_output/
-          git diff --staged --quiet || git commit -m "chore: auto-generate resume PDF"
-          git push
-```
+| Secret Name                | Value                                                    |
+| -------------------------- | -------------------------------------------------------- |
+| `GOOGLE_DRIVE_CREDENTIALS` | Entire contents of the JSON key file                     |
+| `GOOGLE_DRIVE_FILE_ID`     | The file ID from step 2                                  |
+| `GOOGLE_DRIVE_FOLDER_ID`   | The folder ID from step 3 (only needed without a file ID) |
 
 ---
 
@@ -191,15 +82,26 @@ Once set up, your resume will always be available at:
 To manually regenerate and upload:
 
 1. Go to your repo → `Actions` tab
-2. Select "Generate Resume PDF" workflow
+2. Select the "Generate & Upload Resume PDF" workflow
 3. Click `Run workflow`
+
+## Testing the Upload Locally
+
+```bash
+pip install google-api-python-client google-auth
+export GOOGLE_DRIVE_CREDENTIALS="$(cat path/to/key.json)"
+export GOOGLE_DRIVE_FILE_ID="YOUR_FILE_ID"
+python3 scripts/upload_to_drive.py rendercv_output/Mantu_CV.pdf
+```
 
 ---
 
 ## Troubleshooting
 
-| Issue             | Solution                                               |
-| ----------------- | ------------------------------------------------------ |
-| Permission denied | Ensure service account has Editor access to the folder |
-| File not found    | Double-check the `GOOGLE_DRIVE_FILE_ID` secret         |
-| API not enabled   | Enable Google Drive API in Cloud Console               |
+| Issue                                       | Solution                                                                                   |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `File not found (ID: ...)`                  | Share the file with the service account email as **Editor**, and check `GOOGLE_DRIVE_FILE_ID` |
+| Permission denied                           | Ensure the service account has **Editor** access to the file (or folder)                   |
+| `Service Accounts do not have storage quota` | Set `GOOGLE_DRIVE_FILE_ID` so the script updates your file instead of creating one          |
+| API not enabled                             | Enable the Google Drive API in Cloud Console                                               |
+| `KeyError: 'GOOGLE_DRIVE_CREDENTIALS'`      | The secret is missing or misnamed in GitHub Actions settings                               |
