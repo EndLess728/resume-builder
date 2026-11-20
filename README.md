@@ -120,7 +120,7 @@ Output goes to `rendercv_output/`. If `rendercv --version` shows something older
 
 [`ci.yml`](./.github/workflows/ci.yml) runs the reusable workflow against `example_CV.yaml` on every push and pull request, so changes are tested end to end.
 
-To release, add the changes to [`CHANGELOG.md`](./CHANGELOG.md), then push a tag:
+To release, add the changes to [`CHANGELOG.md`](./CHANGELOG.md), then either run **Actions → Release → Run workflow** with a version like `v1.1.0`, or push the tag yourself:
 
 ```bash
 git tag v1.1.0 && git push origin v1.1.0

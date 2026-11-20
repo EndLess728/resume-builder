@@ -1,14 +1,24 @@
 name: Release
 
-# Push a tag like v1.2.0 to publish a release. This renders example_CV.yaml
-# with that exact version, attaches the sample PDF and PNG previews, and moves
-# the major tag (v1) so callers pinned to @v1 pick up the new version.
-# Pre-release tags (v1.2.0-rc.1) are published as pre-releases and leave the
-# major tag alone.
+# Publish a release in either of two ways:
+#   - Actions → Release → Run workflow, and enter a version like v1.2.0
+#     (the workflow creates the tag on the selected branch's latest commit), or
+#   - push a tag yourself: git tag v1.2.0 && git push origin v1.2.0
+#
+# The workflow renders example_CV.yaml with that exact version, attaches the
+# sample PDF and PNG previews to a GitHub release, and moves the major tag (v1)
+# so callers pinned to @v1 pick up the new version. Pre-release versions
+# (v1.2.0-rc.1) are published as pre-releases and leave the major tag alone.
 
 on:
   push:
     tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version to release, e.g. v1.2.0
+        type: string
+        required: true
 
 permissions:
   contents: write
@@ -18,7 +28,44 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Resolve and create tag
+        id: tag
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            TAG="$INPUT_VERSION"
+          else
+            TAG="$GITHUB_REF_NAME"
+          fi
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]; then
+            echo "::error::'$TAG' is not a version like v1.2.0 or v1.2.0-rc.1"
+            exit 1
+          fi
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if git rev-parse -q --verify "refs/tags/$TAG" >/dev/null; then
+              echo "::error::Tag $TAG already exists"
+              exit 1
+            fi
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git tag -a "$TAG" -m "$TAG" "$GITHUB_SHA"
+            git push origin "refs/tags/$TAG"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
   sample:
+    needs: tag
     uses: ./.github/workflows/build-resume.yml
     with:
       cv_file: example_CV.yaml
@@ -26,11 +73,11 @@ jobs:
       artifact_name: sample-resume
 
   release:
-    needs: sample
+    needs: [tag, sample]
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
-      TAG: ${{ github.ref_name }}
+      TAG: ${{ needs.tag.outputs.tag }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -74,6 +121,12 @@ jobs:
           EOF
           sed -i 's/^          //' notes.md
 
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists; refreshing its assets."
+            gh release upload "$TAG" assets/* --clobber
+            exit 0
+          fi
+
           flags=()
           [[ "$TAG" == *-* ]] && flags+=(--prerelease)
 
@@ -85,9 +138,10 @@ jobs:
             "${flags[@]}"
 
       - name: Move major version tag
-        if: ${{ !contains(github.ref_name, '-') }}
+        if: ${{ !contains(needs.tag.outputs.tag, '-') }}
         run: |
           MAJOR="${TAG%%.*}"
-          git tag -f "$MAJOR" "$GITHUB_SHA"
+          git fetch -q origin "refs/tags/$TAG:refs/tags/$TAG"
+          git tag -f "$MAJOR" "$TAG^{commit}"
           git push -f origin "refs/tags/$MAJOR"
           echo "Moved $MAJOR to $TAG"
