@@ -138,7 +138,7 @@ jobs:
       - name: Refresh README preview
         if: ${{ !contains(needs.tag.outputs.tag, '-') }}
         run: |
-          cp "$(ls sample/*.png | sort | head -n 1)" docs/sample-resume.png
+          cp "$(find sample -maxdepth 1 -name '*.png' | sort | head -n 1)" docs/sample-resume.png
           git add docs/sample-resume.png
           if git diff --staged --quiet; then
             echo "Preview unchanged."
