@@ -1,0 +1,149 @@
+name: Build Resume (reusable)
+
+# Reusable workflow: call it from the repo that holds your CV YAML (ideally a
+# private one). It runs in the caller's repo, so logs, artifacts and generated
+# files stay wherever your CV lives. See README.md for a ready-made caller.
+
+on:
+  workflow_call:
+    inputs:
+      cv_file:
+        description: Path to the RenderCV YAML in the calling repo
+        type: string
+        required: true
+      toolkit_repository:
+        description: Repo that holds this workflow's scripts
+        type: string
+        default: EndLess728/MyResume
+      toolkit_ref:
+        description: Branch, tag or SHA of the toolkit repo to use
+        type: string
+        default: main
+      rendercv_version:
+        description: pip version specifier for RenderCV
+        type: string
+        default: ">=2.6"
+      update_npm_stats:
+        description: Add live npm download counts to entries that link to npm packages
+        type: boolean
+        default: true
+      commit_output:
+        description: Commit rendercv_output/ back to the calling repo (needs contents write)
+        type: boolean
+        default: true
+      upload_artifact:
+        description: Save the PDF as a workflow artifact (anyone can download artifacts on public repos)
+        type: boolean
+        default: true
+    secrets:
+      GOOGLE_DRIVE_CREDENTIALS:
+        required: false
+      GOOGLE_DRIVE_FILE_ID:
+        required: false
+      GOOGLE_DRIVE_FOLDER_ID:
+        required: false
+      TELEGRAM_BOT_TOKEN:
+        required: false
+      TELEGRAM_CHAT_ID:
+        required: false
+    outputs:
+      pdf_path:
+        description: Path of the rendered PDF in the calling repo
+        value: ${{ jobs.build.outputs.pdf_path }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      pdf_path: ${{ steps.render.outputs.pdf_path }}
+    env:
+      TOOLKIT: .resume-toolkit
+      CV_FILE: ${{ inputs.cv_file }}
+
+    steps:
+      - name: Checkout CV repository
+        uses: actions/checkout@v4
+
+      - name: Checkout resume toolkit
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ inputs.toolkit_repository }}
+          ref: ${{ inputs.toolkit_ref }}
+          path: ${{ env.TOOLKIT }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        env:
+          RENDERCV_VERSION: ${{ inputs.rendercv_version }}
+        run: |
+          pip install "rendercv[full]${RENDERCV_VERSION}"
+          pip install google-api-python-client google-auth
+
+      - name: Update npm download stats
+        if: inputs.update_npm_stats
+        run: python3 "$TOOLKIT/scripts/update_npm_stats.py" "$CV_FILE"
+
+      - name: Render resume
+        id: render
+        run: |
+          rendercv render "$CV_FILE"
+          pdf=$(ls -t rendercv_output/*.pdf | head -n 1)
+          echo "Rendered $pdf"
+          echo "pdf_path=$pdf" >> "$GITHUB_OUTPUT"
+
+      - name: Check optional integrations
+        id: config
+        env:
+          GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          if [ -n "$GOOGLE_DRIVE_CREDENTIALS" ]; then
+            echo "drive=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "GOOGLE_DRIVE_CREDENTIALS not set; skipping Drive upload."
+          fi
+          if [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ]; then
+            echo "telegram=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Telegram secrets not set; skipping notification."
+          fi
+
+      - name: Upload to Google Drive
+        if: steps.config.outputs.drive == 'true'
+        env:
+          GOOGLE_DRIVE_CREDENTIALS: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+          GOOGLE_DRIVE_FILE_ID: ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
+          GOOGLE_DRIVE_FOLDER_ID: ${{ secrets.GOOGLE_DRIVE_FOLDER_ID }}
+        run: python3 "$TOOLKIT/scripts/upload_to_drive.py" "${{ steps.render.outputs.pdf_path }}"
+
+      - name: Upload PDF artifact
+        if: inputs.upload_artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: resume-pdf
+          path: ${{ steps.render.outputs.pdf_path }}
+
+      - name: Commit generated files
+        if: inputs.commit_output
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add rendercv_output/
+          git diff --staged --quiet || git commit -m "chore: auto-generate resume PDF"
+          git push
+
+      - name: Send Telegram notification
+        if: steps.config.outputs.telegram == 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DRIVE_FILE_ID: ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
+          REPO: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+          ACTOR: ${{ github.actor }}
+        run: python3 "$TOOLKIT/scripts/notify_telegram.py"

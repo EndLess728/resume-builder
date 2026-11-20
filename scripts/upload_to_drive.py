@@ -5,8 +5,7 @@ Updates GOOGLE_DRIVE_FILE_ID in place when set (keeping the shareable link
 stable), otherwise creates the file in GOOGLE_DRIVE_FOLDER_ID and makes it
 publicly readable.
 
-Usage: python3 scripts/upload_to_drive.py [pdf_path]
-Defaults: rendercv_output/Mantu_CV.pdf
+Usage: python3 scripts/upload_to_drive.py <pdf_path>
 """
 
 import json
@@ -19,12 +18,14 @@ from googleapiclient.discovery import build  # type: ignore[import-not-found]
 from googleapiclient.errors import HttpError  # type: ignore[import-not-found]
 from googleapiclient.http import MediaFileUpload  # type: ignore[import-not-found]
 
-DEFAULT_PDF = "rendercv_output/Mantu_CV.pdf"
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 
 
 def main() -> int:
-    pdf = Path(sys.argv[1] if len(sys.argv) > 1 else DEFAULT_PDF)
+    if len(sys.argv) != 2:
+        print("Usage: python3 scripts/upload_to_drive.py <pdf_path>")
+        return 1
+    pdf = Path(sys.argv[1])
     if not pdf.exists():
         print(f"❌ PDF not found: {pdf}")
         return 1

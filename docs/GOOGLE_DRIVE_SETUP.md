@@ -4,9 +4,9 @@ description: Generate resume PDF and upload to Google Drive with a permanent sha
 
 # Resume Generation & Google Drive Upload Workflow
 
-The [`Generate & Upload Resume PDF`](../.github/workflows/generate-and-upload-resume.yml) workflow renders the resume and uploads it to Google Drive with [`scripts/upload_to_drive.py`](../scripts/upload_to_drive.py). It updates the same Drive file every time, so the **link stays the same** and can be used in a portfolio.
+The reusable [`build-resume.yml`](../.github/workflows/build-resume.yml) workflow renders the resume and uploads it to Google Drive with [`scripts/upload_to_drive.py`](../scripts/upload_to_drive.py). It updates the same Drive file every time, so the **link stays the same** and can be used in a portfolio.
 
-This guide covers the one-time Google setup. For the full list of pipeline secrets (including the optional Telegram ones), see the **CI Pipeline** section of the [README](../README.md).
+This guide covers the one-time Google setup. For the full list of pipeline secrets (including the optional Telegram ones), see the **Secrets** section of the [README](../README.md).
 
 ## Prerequisites
 
@@ -36,7 +36,7 @@ The service account's email (the `client_email` field in the JSON, e.g. `resume-
 
 ### 2. Upload the Resume and Share It (One-time Setup)
 
-1. Render the PDF locally (`rendercv render Mantu_CV.yaml`) and upload `rendercv_output/Mantu_CV.pdf` to [Google Drive](https://drive.google.com/).
+1. Render the PDF locally (`rendercv render Your_CV.yaml`) and upload `rendercv_output/Your_Name_CV.pdf` to [Google Drive](https://drive.google.com/).
 2. Right-click the file → `Share`:
    - Add the service account email with **Editor** permission (without this, the upload fails with `File not found`)
    - Under `General access`, choose `Anyone with the link` → `Viewer`
@@ -53,7 +53,7 @@ If `GOOGLE_DRIVE_FILE_ID` is not set, the script instead creates a new file in a
 
 ### 4. Add GitHub Secrets
 
-Go to your GitHub repository → `Settings` → `Secrets and variables` → `Actions`:
+Go to the GitHub repository that holds your CV (the one that calls the workflow) → `Settings` → `Secrets and variables` → `Actions`:
 
 | Secret Name                | Value                                                    |
 | -------------------------- | -------------------------------------------------------- |
@@ -82,7 +82,7 @@ Once set up, your resume will always be available at:
 To manually regenerate and upload:
 
 1. Go to your repo → `Actions` tab
-2. Select the "Generate & Upload Resume PDF" workflow
+2. Select your resume workflow (e.g. "Resume")
 3. Click `Run workflow`
 
 ## Testing the Upload Locally
@@ -91,7 +91,7 @@ To manually regenerate and upload:
 pip install google-api-python-client google-auth
 export GOOGLE_DRIVE_CREDENTIALS="$(cat path/to/key.json)"
 export GOOGLE_DRIVE_FILE_ID="YOUR_FILE_ID"
-python3 scripts/upload_to_drive.py rendercv_output/Mantu_CV.pdf
+python3 scripts/upload_to_drive.py rendercv_output/Your_Name_CV.pdf
 ```
 
 ---

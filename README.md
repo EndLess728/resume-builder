@@ -1,113 +1,101 @@
-# Mantu's Resume
+# MyResume — a RenderCV resume pipeline
 
-This repository contains the source code for my resume, built using [RenderCV](https://github.com/rendercv/rendercv).
+Write your resume as YAML, and let GitHub Actions turn it into a PDF, keep it up to date on Google Drive behind one permanent link, and ping you on Telegram when it's done. Built on [RenderCV](https://github.com/rendercv/rendercv).
 
-RenderCV takes a YAML input file (`Mantu_CV.yaml`) and generates a professional, Typst-formatted PDF.
+The pipeline is a **reusable workflow**. Your actual CV lives in a separate (private) repo that calls it. That keeps your phone number, email and generated PDFs out of public view: logs, artifacts and commits all happen in your private repo, while the code lives here in one place.
 
-## 📄 Resume PDF
-
-- **[View/Download Resume](https://drive.google.com/file/d/YOUR_FILE_ID/view)**: Latest version of my resume (Google Drive)
-
-## 🚀 Quick Start
-
-### Installation
-
-**Using Homebrew (Recommended for macOS):**
-
-1. Install Python:
-
-   ```bash
-   brew install python
-   ```
-
-2. Install `pipx`:
-
-   ```bash
-   brew install pipx
-   pipx ensurepath
-   ```
-
-3. Install RenderCV:
-   ```bash
-   pipx install "rendercv[full]>=2.6"
-   ```
-
-4. Check the version:
-   ```bash
-   rendercv --version
-   ```
-
-> **⚠️ RenderCV version:** `Mantu_CV.yaml` requires **RenderCV v2.6 or newer**. If `rendercv --version` shows something older, check `which -a rendercv` for a stale copy installed with plain `pip` that shadows the pipx one, remove it, and run `pipx upgrade rendercv`.
-
-### Rendering the Resume
-
-To generate the PDF from the YAML file:
-
-```bash
-rendercv render Mantu_CV.yaml
+```
+┌───────────────────────────┐   uses   ┌──────────────────────────────────┐
+│ your-private-resume repo  │ ───────▶ │ EndLess728/MyResume (this repo)  │
+│  Your_CV.yaml             │          │  .github/workflows/build-resume  │
+│  .github/workflows/...    │          │  scripts/                        │
+│  secrets: Drive, Telegram │          │  example_CV.yaml                 │
+└───────────────────────────┘          └──────────────────────────────────┘
 ```
 
-This will create a `rendercv_output` directory containing:
+## What it does
 
-- `Mantu_CV.pdf`: The final resume.
-- `Mantu_CV.typ`: The generated Typst source.
-- `Mantu_CV_1.png`, `Mantu_CV_2.png`: A PNG preview of each page.
+1. Adds live npm download counts to any entry that links to an npm package ([`scripts/update_npm_stats.py`](./scripts/update_npm_stats.py)).
+2. Renders the PDF (and PNG previews) with RenderCV.
+3. Uploads the PDF to Google Drive, updating the same file so the link never changes ([`scripts/upload_to_drive.py`](./scripts/upload_to_drive.py)). Optional.
+4. Saves the PDF as a workflow artifact and commits `rendercv_output/` back to your repo.
+5. Sends a Telegram notification ([`scripts/notify_telegram.py`](./scripts/notify_telegram.py)). Optional.
 
-### Live Editing
+## Use it for your own resume
 
-To automatically re-render the PDF whenever you save changes to the YAML file:
+**1. Create a private repo** with your CV YAML. Start from [`example_CV.yaml`](./example_CV.yaml) and rename it, e.g. `Jane_Doe_CV.yaml`.
 
-```bash
-rendercv render --watch Mantu_CV.yaml
+**2. Add this workflow** to it as `.github/workflows/resume.yml`:
+
+```yaml
+name: Resume
+
+on:
+  push:
+    branches: [main]
+    paths: ["Jane_Doe_CV.yaml"]
+  schedule:
+    - cron: "0 18 * * 0" # weekly, refreshes npm download counts
+  workflow_dispatch:
+
+permissions:
+  contents: write # lets the workflow commit rendercv_output/
+
+jobs:
+  build:
+    uses: EndLess728/MyResume/.github/workflows/build-resume.yml@main
+    with:
+      cv_file: Jane_Doe_CV.yaml
+    secrets: inherit
 ```
 
-## ⚙️ CI Pipeline
+**3. Add secrets** (optional) under **Settings → Secrets and variables → Actions** in your private repo. See below.
 
-[`.github/workflows/generate-and-upload-resume.yml`](./.github/workflows/generate-and-upload-resume.yml) rebuilds the resume and publishes it.
+Push, and the resume builds. For a stable setup, pin `@main` to a tag or commit SHA.
 
-**Triggers:** a push to `main` that changes `Mantu_CV.yaml`, every Sunday at 11:30 PM IST (to refresh the npm download counts), or a manual run from the **Actions** tab (`Run workflow`).
+### Inputs
 
-**Steps:**
+| Input                | Default               | Description                                                         |
+| -------------------- | --------------------- | ------------------------------------------------------------------- |
+| `cv_file`            | required              | Path to your RenderCV YAML.                                         |
+| `update_npm_stats`   | `true`                | Append live npm download counts to entries linking to npm packages. |
+| `commit_output`      | `true`                | Commit `rendercv_output/` back to your repo.                        |
+| `upload_artifact`    | `true`                | Save the PDF as a `resume-pdf` artifact.                            |
+| `rendercv_version`   | `>=2.6`               | pip version specifier for RenderCV.                                 |
+| `toolkit_repository` | `EndLess728/MyResume` | Where the scripts come from. Set this if you fork the toolkit.      |
+| `toolkit_ref`        | `main`                | Branch, tag or SHA of the toolkit to use.                           |
 
-1. Installs `rendercv[full]` (v2.6 or newer) and the Google API client.
-2. Updates npm download counts in the YAML ([`scripts/update_npm_stats.py`](./scripts/update_npm_stats.py)). This uses the public npm API, so no key is needed.
-3. Renders the PDF.
-4. Uploads it to Google Drive ([`scripts/upload_to_drive.py`](./scripts/upload_to_drive.py)).
-5. Saves the PDF as a workflow artifact (`resume-pdf`).
-6. Commits the regenerated `rendercv_output/` back to `main`.
-7. Sends a Telegram notification ([`scripts/notify_telegram.py`](./scripts/notify_telegram.py)). Optional: the step is skipped unless both Telegram secrets are set.
+### Secrets
 
-### Required secrets
+All optional. Steps whose secrets are missing are skipped.
 
-Add these under **Settings → Secrets and variables → Actions → New repository secret**:
+| Secret                     | Value                                                                                                                         |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `GOOGLE_DRIVE_CREDENTIALS` | The entire contents of a Google Cloud service-account JSON key. Enables the Drive upload.                                      |
+| `GOOGLE_DRIVE_FILE_ID`     | ID of the existing PDF in Drive (`https://drive.google.com/file/d/<FILE_ID>/view`). Updated in place, so the link stays fixed. |
+| `GOOGLE_DRIVE_FOLDER_ID`   | Drive folder to create the file in. Only used when `GOOGLE_DRIVE_FILE_ID` is not set.                                          |
+| `TELEGRAM_BOT_TOKEN`       | Bot token from [@BotFather](https://t.me/BotFather).                                                                          |
+| `TELEGRAM_CHAT_ID`         | Chat to notify. Message your bot, then read `chat.id` from `https://api.telegram.org/bot<TOKEN>/getUpdates`.                  |
 
-| Secret                     | Required    | Value                                                                                                                                  |
-| -------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `GOOGLE_DRIVE_CREDENTIALS` | Yes         | The entire contents of the Google Cloud service-account JSON key file.                                                                 |
-| `GOOGLE_DRIVE_FILE_ID`     | Recommended | ID of the existing PDF in Drive (from `https://drive.google.com/file/d/<FILE_ID>/view`). The file is updated in place, so the link stays the same. |
-| `GOOGLE_DRIVE_FOLDER_ID`   | Only if no file ID | ID of the Drive folder (from `https://drive.google.com/drive/folders/<FOLDER_ID>`). Used only when `GOOGLE_DRIVE_FILE_ID` is not set. |
-| `TELEGRAM_BOT_TOKEN`       | Optional    | Bot token from [@BotFather](https://t.me/BotFather). If it or the chat ID is missing, the notification is skipped.                    |
-| `TELEGRAM_CHAT_ID`         | Optional    | The chat to notify. Send your bot a message, then read `chat.id` from `https://api.telegram.org/bot<TOKEN>/getUpdates`.               |
+The one-time Google setup (service account, sharing the file with it) is walked through in [`docs/GOOGLE_DRIVE_SETUP.md`](./docs/GOOGLE_DRIVE_SETUP.md).
 
-### One-time Google Drive setup
+> **Keep the CV repo private.** If you call this from a public repo, set `upload_artifact: false` and `commit_output: false`, since anyone can download artifacts and read commits there.
 
-1. In [Google Cloud Console](https://console.cloud.google.com/), create a project and enable the **Google Drive API**.
-2. Create a **service account** (`APIs & Services → Credentials → Create Credentials → Service Account`), then add a **JSON key** for it (`Keys → Add Key → Create new key`). Paste that file's contents into `GOOGLE_DRIVE_CREDENTIALS`.
-3. Upload `Mantu_CV.pdf` to your Drive manually, set **Share → Anyone with the link → Viewer**, and copy its file ID into `GOOGLE_DRIVE_FILE_ID`.
-4. **Share that file with the service account's email** (`...@<project>.iam.gserviceaccount.com`, the `client_email` in the JSON key) with **Editor** access. If you skip this, the upload fails with `File not found`.
+## Render locally
 
-> **Tip:** Prefer setting `GOOGLE_DRIVE_FILE_ID`. Without it, the script creates a new file on every run, so the shareable link changes each time. Also, service accounts have no storage quota of their own, so creating a file in a personal (non-shared) Drive folder may be rejected. Updating a file you own does not have this problem.
+```bash
+brew install pipx && pipx ensurepath
+pipx install "rendercv[full]>=2.6"
+rendercv render example_CV.yaml          # one-off
+rendercv render --watch example_CV.yaml  # re-render on save
+```
 
-A longer walkthrough is in [`docs/GOOGLE_DRIVE_SETUP.md`](./docs/GOOGLE_DRIVE_SETUP.md).
+Output goes to `rendercv_output/`. If `rendercv --version` shows something older than 2.6, check `which -a rendercv` for a stale pip install shadowing the pipx one.
 
-### Repository settings
+## Development
 
-The workflow declares `permissions: contents: write` so it can push the regenerated files. If the **Commit generated files** step fails with a `403`, go to **Settings → Actions → General → Workflow permissions** and allow **Read and write permissions**.
+[`ci.yml`](./.github/workflows/ci.yml) runs the reusable workflow against `example_CV.yaml` on every push and pull request, using the scripts from that same commit, so changes are tested end to end.
 
-## 📄 Source File
+## License
 
-- **[Mantu_CV.yaml](./Mantu_CV.yaml)**: The main data file containing all resume content (Experience, Projects, Education, etc.).
-
-## 🛠️ Built With
-
-- [RenderCV](https://docs.rendercv.com/) - CV generator from YAML
+[MIT](./LICENSE)

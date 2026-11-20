@@ -1,1 +1,9 @@
 .DS_Store
+__pycache__/
+
+# This repo is the toolkit only. Real CVs and their rendered output belong in
+# your own (private) repo that calls the reusable workflow.
+rendercv_output/
+*_CV.yaml
+!example_CV.yaml
+.resume-toolkit/
