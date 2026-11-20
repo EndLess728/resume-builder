@@ -35,23 +35,23 @@ The core renders your YAML to PDF and PNG with RenderCV, saves it as a workflow 
 
 Modules are plain composite actions, so you can also use them in other workflows. Want another one, like Slack or email? [Adding a module](./CONTRIBUTING.md#adding-a-module) takes a template and four small edits.
 
-## Use it for your own resume
+## Get started
 
-### Quick start: use the template
+**[![Use this template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge&logo=github)](https://github.com/new?template_name=resume-builder-template&template_owner=EndLess728)**
 
-The fastest way is the ready-made **[resume-builder-template](https://github.com/EndLess728/resume-builder-template)** repo:
+1. **Create your repo from the template.** Click the button above (or **Use this template** on [resume-builder-template](https://github.com/EndLess728/resume-builder-template)), and choose **Private**. Your resume has your phone number and email on it, and in a private repo the logs, artifacts and PDFs stay private too.
+2. **Check the first build.** Your new repo builds the example resume straight away. Its **Actions** tab should show a green run, and the PDF appears in `rendercv_output/`.
+3. **Make it yours.** Edit `My_CV.yaml` with your details and push. Every push rebuilds the PDF.
+4. **Optional: turn on modules.** Add the [Drive or Telegram secrets](#secrets) under **Settings → Secrets and variables → Actions**, then run **Actions → Resume → Run workflow**.
 
-1. Click **[Use this template → Create a new repository](https://github.com/new?template_name=resume-builder-template&template_owner=EndLess728)** and choose **Private**.
-2. Edit `My_CV.yaml` and push. The PDF is built into `rendercv_output/`.
-3. Optional: add the Drive or Telegram secrets below.
+Want to see a finished setup before you start? The template builds its own example resume, so you can browse its [workflow runs](https://github.com/EndLess728/resume-builder-template/actions) and [generated PDF](https://github.com/EndLess728/resume-builder-template/tree/main/rendercv_output).
 
-Not sure what a finished setup looks like? The template builds its own example resume, so you can browse its [workflow runs](https://github.com/EndLess728/resume-builder-template/actions) and [generated PDF](https://github.com/EndLess728/resume-builder-template/tree/main/rendercv_output) first.
+<details>
+<summary><b>Already have a repo for your CV?</b> Add the workflow by hand instead.</summary>
 
-### Manual setup
+<br>
 
-**1. Create a private repo** with your CV YAML. Start from [`example_CV.yaml`](./example_CV.yaml) and rename it, e.g. `Jane_Doe_CV.yaml`.
-
-**2. Add this workflow** to it as `.github/workflows/resume.yml`:
+Save this as `.github/workflows/resume.yml`, with `cv_file` pointing at your YAML. The template's [`resume.yml`](https://github.com/EndLess728/resume-builder-template/blob/main/.github/workflows/resume.yml) is the same file with every option commented.
 
 ```yaml
 name: Resume
@@ -59,7 +59,7 @@ name: Resume
 on:
   push:
     branches: [main]
-    paths: ["Jane_Doe_CV.yaml"]
+    paths: ["My_CV.yaml"]
   schedule:
     - cron: "0 18 * * 0" # weekly, refreshes npm download counts
   workflow_dispatch:
@@ -71,13 +71,13 @@ jobs:
   build:
     uses: EndLess728/resume-builder/.github/workflows/build-resume.yml@v1
     with:
-      cv_file: Jane_Doe_CV.yaml
+      cv_file: My_CV.yaml
     secrets: inherit
 ```
 
-**3. Add secrets** (optional) under **Settings → Secrets and variables → Actions** in your private repo. See below.
+</details>
 
-Push, and the resume builds.
+## Reference
 
 ### Inputs
 
@@ -134,11 +134,13 @@ The one-time Google setup (service account, sharing the file with it) is walked 
 
 ## Render locally
 
+Preview changes on your machine before pushing. Run this in your CV repo:
+
 ```bash
 brew install pipx && pipx ensurepath
 pipx install "rendercv[full]>=2.6"
-rendercv render example_CV.yaml          # one-off
-rendercv render --watch example_CV.yaml  # re-render on save
+rendercv render My_CV.yaml          # one-off
+rendercv render --watch My_CV.yaml  # re-render on save
 ```
 
 Output goes to `rendercv_output/`. If `rendercv --version` shows something older than 2.6, check `which -a rendercv` for a stale pip install shadowing the pipx one.
