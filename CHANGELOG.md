@@ -6,6 +6,10 @@ or an exact tag such as `@v1.0.0` for a fixed version.
 
 ## [Unreleased]
 
+### Added
+
+- [resume-builder-template](https://github.com/EndLess728/resume-builder-template), a ready-made repo to start from with **Use this template**. It's linked from the README.
+
 ## [1.2.0] - 2026-11-20
 
 ### Changed

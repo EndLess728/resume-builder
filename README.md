@@ -37,6 +37,18 @@ Modules are plain composite actions, so you can also use them in other workflows
 
 ## Use it for your own resume
 
+### Quick start: use the template
+
+The fastest way is the ready-made **[resume-builder-template](https://github.com/EndLess728/resume-builder-template)** repo:
+
+1. Click **[Use this template → Create a new repository](https://github.com/new?template_name=resume-builder-template&template_owner=EndLess728)** and choose **Private**.
+2. Edit `My_CV.yaml` and push. The PDF is built into `rendercv_output/`.
+3. Optional: add the Drive or Telegram secrets below.
+
+Not sure what a finished setup looks like? The template builds its own example resume, so you can browse its [workflow runs](https://github.com/EndLess728/resume-builder-template/actions) and [generated PDF](https://github.com/EndLess728/resume-builder-template/tree/main/rendercv_output) first.
+
+### Manual setup
+
 **1. Create a private repo** with your CV YAML. Start from [`example_CV.yaml`](./example_CV.yaml) and rename it, e.g. `Jane_Doe_CV.yaml`.
 
 **2. Add this workflow** to it as `.github/workflows/resume.yml`:
