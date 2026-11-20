@@ -1,5 +1,9 @@
 # resume-builder
 
+[![Latest release](https://img.shields.io/github/v/release/EndLess728/resume-builder?sort=semver)](https://github.com/EndLess728/resume-builder/releases/latest)
+[![CI](https://github.com/EndLess728/resume-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/EndLess728/resume-builder/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+
 Write your resume as YAML, and let GitHub Actions turn it into a PDF, keep it up to date on Google Drive behind one permanent link, and ping you on Telegram when it's done. Built on [RenderCV](https://github.com/rendercv/rendercv).
 
 The pipeline is a **reusable workflow**. Your actual CV lives in a separate (private) repo that calls it. That keeps your phone number, email and generated PDFs out of public view: logs, artifacts and commits all happen in your private repo, while the code lives here in one place.
@@ -13,12 +17,18 @@ The pipeline is a **reusable workflow**. Your actual CV lives in a separate (pri
 └───────────────────────────┘          └─────────────────────────────────────┘
 ```
 
+## Sample output
+
+This is [`example_CV.yaml`](./example_CV.yaml) rendered by the latest release. **[Download the sample PDF](https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume.pdf)**
+
+<a href="https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume.pdf"><img src="https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume-page-1.png" alt="Sample resume, page 1" width="600"></a>
+
 ## What it does
 
 1. Adds live npm download counts to any entry that links to an npm package ([`scripts/update_npm_stats.py`](./scripts/update_npm_stats.py)).
 2. Renders the PDF (and PNG previews) with RenderCV.
 3. Uploads the PDF to Google Drive, updating the same file so the link never changes ([`scripts/upload_to_drive.py`](./scripts/upload_to_drive.py)). Optional.
-4. Saves the PDF as a workflow artifact and commits `rendercv_output/` back to your repo.
+4. Saves the PDF and PNG previews as a workflow artifact and commits `rendercv_output/` back to your repo.
 5. Sends a Telegram notification ([`scripts/notify_telegram.py`](./scripts/notify_telegram.py)). Optional.
 
 ## Use it for your own resume
@@ -43,7 +53,7 @@ permissions:
 
 jobs:
   build:
-    uses: EndLess728/resume-builder/.github/workflows/build-resume.yml@main
+    uses: EndLess728/resume-builder/.github/workflows/build-resume.yml@v1
     with:
       cv_file: Jane_Doe_CV.yaml
     secrets: inherit
@@ -51,19 +61,33 @@ jobs:
 
 **3. Add secrets** (optional) under **Settings → Secrets and variables → Actions** in your private repo. See below.
 
-Push, and the resume builds. For a stable setup, pin `@main` to a tag or commit SHA.
+Push, and the resume builds.
 
 ### Inputs
 
-| Input                | Default               | Description                                                         |
-| -------------------- | --------------------- | ------------------------------------------------------------------- |
-| `cv_file`            | required              | Path to your RenderCV YAML.                                         |
-| `update_npm_stats`   | `true`                | Append live npm download counts to entries linking to npm packages. |
-| `commit_output`      | `true`                | Commit `rendercv_output/` back to your repo.                        |
-| `upload_artifact`    | `true`                | Save the PDF as a `resume-pdf` artifact.                            |
-| `rendercv_version`   | `>=2.6`               | pip version specifier for RenderCV.                                 |
-| `toolkit_repository` | `EndLess728/resume-builder` | Where the scripts come from. Set this if you fork the toolkit.      |
-| `toolkit_ref`        | `main`                | Branch, tag or SHA of the toolkit to use.                           |
+| Input                | Default  | Description                                                                         |
+| -------------------- | -------- | ----------------------------------------------------------------------------------- |
+| `cv_file`            | required | Path to your RenderCV YAML.                                                         |
+| `update_npm_stats`   | `true`   | Append live npm download counts to entries linking to npm packages.                 |
+| `commit_output`      | `true`   | Commit `rendercv_output/` back to your repo.                                        |
+| `upload_artifact`    | `true`   | Save the PDF and PNG previews as a workflow artifact.                               |
+| `artifact_name`      | `resume` | Name of that artifact.                                                              |
+| `rendercv_version`   | `>=2.6`  | pip version specifier for RenderCV.                                                 |
+| `toolkit_repository` | auto     | Where the scripts come from. Defaults to the repo you called the workflow from.     |
+| `toolkit_ref`        | auto     | Version of the scripts. Defaults to the exact commit of the workflow you pinned.    |
+
+### Versioning
+
+Releases follow [Semantic Versioning](https://semver.org/) and are listed in the [changelog](./CHANGELOG.md).
+
+| Pin                      | You get                                                          |
+| ------------------------ | ---------------------------------------------------------------- |
+| `@v1` (recommended)      | The latest 1.x release: fixes and new features, nothing breaking. |
+| `@v1.0.0`                | Exactly that release, never changes.                              |
+| `@<commit-sha>`          | Exactly that commit. The safest choice for strict supply-chain rules. |
+| `@main`                  | Unreleased changes. May break.                                    |
+
+The workflow always loads its scripts from the same commit as the workflow file you pinned, so the workflow and scripts can't drift apart.
 
 ### Secrets
 
@@ -94,7 +118,15 @@ Output goes to `rendercv_output/`. If `rendercv --version` shows something older
 
 ## Development
 
-[`ci.yml`](./.github/workflows/ci.yml) runs the reusable workflow against `example_CV.yaml` on every push and pull request, using the scripts from that same commit, so changes are tested end to end.
+[`ci.yml`](./.github/workflows/ci.yml) runs the reusable workflow against `example_CV.yaml` on every push and pull request, so changes are tested end to end.
+
+To release, add the changes to [`CHANGELOG.md`](./CHANGELOG.md), then push a tag:
+
+```bash
+git tag v1.1.0 && git push origin v1.1.0
+```
+
+[`release.yml`](./.github/workflows/release.yml) renders the sample with that exact version, publishes a GitHub release with `sample-resume.pdf` and PNG previews attached, and moves the `v1` tag to it. Tags with a suffix, like `v1.1.0-rc.1`, become pre-releases and don't move `v1`.
 
 ## License
 

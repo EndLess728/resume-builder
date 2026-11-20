@@ -12,13 +12,13 @@ on:
         type: string
         required: true
       toolkit_repository:
-        description: Repo that holds this workflow's scripts
+        description: Repo to load the scripts from. Defaults to the repo this workflow was called from, so you rarely need it.
         type: string
-        default: EndLess728/resume-builder
+        default: ""
       toolkit_ref:
-        description: Branch, tag or SHA of the toolkit repo to use
+        description: Ref to load the scripts from. Defaults to the exact commit of this workflow, so @v1.0.0 uses v1.0.0's scripts.
         type: string
-        default: main
+        default: ""
       rendercv_version:
         description: pip version specifier for RenderCV
         type: string
@@ -32,9 +32,13 @@ on:
         type: boolean
         default: true
       upload_artifact:
-        description: Save the PDF as a workflow artifact (anyone can download artifacts on public repos)
+        description: Save rendercv_output/ (PDF and PNG previews) as a workflow artifact (anyone can download artifacts on public repos)
         type: boolean
         default: true
+      artifact_name:
+        description: Name of the workflow artifact
+        type: string
+        default: resume
     secrets:
       GOOGLE_DRIVE_CREDENTIALS:
         required: false
@@ -64,12 +68,17 @@ jobs:
       - name: Checkout CV repository
         uses: actions/checkout@v4
 
+      # job.workflow_* describe this reusable workflow itself (not the caller),
+      # so the scripts always match the version the caller pinned.
       - name: Checkout resume toolkit
         uses: actions/checkout@v4
         with:
-          repository: ${{ inputs.toolkit_repository }}
-          ref: ${{ inputs.toolkit_ref }}
+          repository: ${{ inputs.toolkit_repository || job.workflow_repository || 'EndLess728/resume-builder' }}
+          ref: ${{ inputs.toolkit_ref || job.workflow_sha || 'main' }}
           path: ${{ env.TOOLKIT }}
+
+      - name: Show toolkit version
+        run: echo "resume-builder toolkit at $(git -C "$TOOLKIT" rev-parse HEAD) ($(git -C "$TOOLKIT" describe --tags --always 2>/dev/null || true))"
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -125,8 +134,10 @@ jobs:
         if: inputs.upload_artifact
         uses: actions/upload-artifact@v4
         with:
-          name: resume-pdf
-          path: ${{ steps.render.outputs.pdf_path }}
+          name: ${{ inputs.artifact_name }}
+          path: |
+            rendercv_output/*.pdf
+            rendercv_output/*.png
 
       - name: Commit generated files
         if: inputs.commit_output
