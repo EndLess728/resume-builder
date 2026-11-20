@@ -1,0 +1,93 @@
+name: Release
+
+# Push a tag like v1.2.0 to publish a release. This renders example_CV.yaml
+# with that exact version, attaches the sample PDF and PNG previews, and moves
+# the major tag (v1) so callers pinned to @v1 pick up the new version.
+# Pre-release tags (v1.2.0-rc.1) are published as pre-releases and leave the
+# major tag alone.
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  sample:
+    uses: ./.github/workflows/build-resume.yml
+    with:
+      cv_file: example_CV.yaml
+      commit_output: false
+      artifact_name: sample-resume
+
+  release:
+    needs: sample
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      TAG: ${{ github.ref_name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download sample resume
+        uses: actions/download-artifact@v4
+        with:
+          name: sample-resume
+          path: sample
+
+      - name: Name release assets
+        run: |
+          mkdir assets
+          cp sample/*.pdf assets/sample-resume.pdf
+          i=1
+          for png in $(ls sample/*.png | sort); do
+            cp "$png" "assets/sample-resume-page-$i.png"
+            i=$((i + 1))
+          done
+          ls -l assets
+
+      - name: Create GitHub release
+        run: |
+          MAJOR="${TAG%%.*}"
+          cat > notes.md <<EOF
+          ## Use this version
+
+          \`\`\`yaml
+          jobs:
+            build:
+              uses: ${GITHUB_REPOSITORY}/.github/workflows/build-resume.yml@${TAG}
+              with:
+                cv_file: Your_CV.yaml
+              secrets: inherit
+          \`\`\`
+
+          Pin \`@${TAG}\` for this exact version, or \`@${MAJOR}\` to get fixes and features without breaking changes.
+
+          The attached \`sample-resume.pdf\` was rendered from [\`example_CV.yaml\`](https://github.com/${GITHUB_REPOSITORY}/blob/${TAG}/example_CV.yaml) by this release.
+
+          EOF
+          sed -i 's/^          //' notes.md
+
+          flags=()
+          [[ "$TAG" == *-* ]] && flags+=(--prerelease)
+
+          gh release create "$TAG" assets/* \
+            --title "$TAG" \
+            --notes-file notes.md \
+            --generate-notes \
+            --verify-tag \
+            "${flags[@]}"
+
+      - name: Move major version tag
+        if: ${{ !contains(github.ref_name, '-') }}
+        run: |
+          MAJOR="${TAG%%.*}"
+          git tag -f "$MAJOR" "$GITHUB_SHA"
+          git push -f origin "refs/tags/$MAJOR"
+          echo "Moved $MAJOR to $TAG"
