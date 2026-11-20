@@ -6,6 +6,8 @@ or an exact tag such as `@v1.0.0` for a fixed version.
 
 ## [Unreleased]
 
+## [1.2.1] - 2026-11-20
+
 ### Fixed
 
 - Removed the "Node.js 20 is deprecated" warnings by updating to `actions/checkout@v7`, `actions/setup-python@v7`, `actions/upload-artifact@v7` and `actions/download-artifact@v8`, which run on Node.js 24.
@@ -65,6 +67,7 @@ First public release.
 - The workflow loads its scripts from its own commit, so a pinned version always runs matching scripts.
 - `example_CV.yaml`, rendered and attached to every release as a sample.
 
+[1.2.1]: https://github.com/EndLess728/resume-builder/releases/tag/v1.2.1
 [1.2.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.2.0
 [1.1.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.1.0
 [1.0.1]: https://github.com/EndLess728/resume-builder/releases/tag/v1.0.1
