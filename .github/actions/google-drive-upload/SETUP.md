@@ -2,7 +2,7 @@
 
 The [`google-drive-upload`](./README.md) module uploads the rendered resume to Google Drive with [`upload_to_drive.py`](./upload_to_drive.py). It updates the same Drive file every time, so the **link stays the same** and can be used in a portfolio.
 
-This guide covers the one-time Google setup. For the full list of pipeline secrets (including the optional Telegram ones), see the **Secrets** section of the [main README](../../README.md).
+This guide covers the one-time Google setup. For the full list of pipeline secrets (including the optional Telegram ones), see the **Secrets** section of the [main README](../../../README.md).
 
 ## Prerequisites
 
@@ -87,7 +87,7 @@ To manually regenerate and upload:
 pip install google-api-python-client google-auth
 export GOOGLE_DRIVE_CREDENTIALS="$(cat path/to/key.json)"
 export GOOGLE_DRIVE_FILE_ID="YOUR_FILE_ID"
-python3 actions/google-drive-upload/upload_to_drive.py rendercv_output/Your_Name_CV.pdf
+python3 .github/actions/google-drive-upload/upload_to_drive.py rendercv_output/Your_Name_CV.pdf
 ```
 
 ---

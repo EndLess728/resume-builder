@@ -1,0 +1,44 @@
+name: Sync release notes
+
+# Rewrites the notes of existing GitHub releases from CHANGELOG.md, using the
+# same format as release.yml. Run it after fixing or expanding the changelog
+# for a version that's already released. Assets and tags are not touched.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release to update, e.g. v1.1.0. Leave empty to update every release.
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      VERSION: ${{ inputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Update release notes
+        run: |
+          if [ -n "$VERSION" ]; then
+            tags="$VERSION"
+          else
+            tags=$(gh release list --limit 100 --json tagName --jq '.[].tagName')
+          fi
+
+          for tag in $tags; do
+            if python3 .github/scripts/release_notes.py "$tag" > notes.md; then
+              gh release edit "$tag" --notes-file notes.md
+              echo "✅ $tag"
+            else
+              echo "⏭️  $tag has no CHANGELOG.md section; left unchanged"
+            fi
+          done

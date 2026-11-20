@@ -29,7 +29,7 @@ Sends a Telegram message when the resume is built. It can attach the PDF, and it
 ## Use it on its own
 
 ```yaml
-- uses: EndLess728/resume-builder/actions/telegram-notify@v1
+- uses: EndLess728/resume-builder/.github/actions/telegram-notify@v1
   if: always()
   with:
     bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -42,5 +42,5 @@ Sends a Telegram message when the resume is built. It can attach the PDF, and it
 
 ```bash
 TELEGRAM_BOT_TOKEN=... TELEGRAM_CHAT_ID=... REPO=me/my-cv ACTOR=me \
-  python3 actions/telegram-notify/notify_telegram.py
+  python3 .github/actions/telegram-notify/notify_telegram.py
 ```

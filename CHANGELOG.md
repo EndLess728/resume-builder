@@ -6,6 +6,17 @@ or an exact tag such as `@v1.0.0` for a fixed version.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-11-20
+
+### Changed
+
+- Modules moved from `actions/` to `.github/actions/`, next to the workflows that use them. If you use a module on its own, update the path, e.g. `EndLess728/resume-builder/.github/actions/telegram-notify@v1`. Callers of `build-resume.yml` need no changes.
+- Release notes now come from this changelog instead of a list of commits.
+
+### Added
+
+- **Sync release notes** workflow, which rewrites existing releases' notes from `CHANGELOG.md` after you edit it.
+
 ## [1.1.0] - 2026-11-20
 
 ### Added
@@ -46,6 +57,7 @@ First public release.
 - The workflow loads its scripts from its own commit, so a pinned version always runs matching scripts.
 - `example_CV.yaml`, rendered and attached to every release as a sample.
 
+[1.2.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.2.0
 [1.1.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.1.0
 [1.0.1]: https://github.com/EndLess728/resume-builder/releases/tag/v1.0.1
 [1.0.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.0.0

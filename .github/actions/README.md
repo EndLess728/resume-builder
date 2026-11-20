@@ -1,6 +1,6 @@
 # Modules
 
-Every optional feature of resume-builder is a **module**: a [composite action](https://docs.github.com/en/actions/sharing-automations/creating-actions/creating-a-composite-action) in its own folder here. [`build-resume.yml`](../.github/workflows/build-resume.yml) wires them into the pipeline, and each one also works on its own in any workflow.
+Every optional feature of resume-builder is a **module**: a [composite action](https://docs.github.com/en/actions/sharing-automations/creating-actions/creating-a-composite-action) in its own folder here. [`build-resume.yml`](../workflows/build-resume.yml) wires them into the pipeline, and each one also works on its own in any workflow.
 
 | Module                                          | Stage      | Turns on when                                   | What it does                                   |
 | ----------------------------------------------- | ---------- | ----------------------------------------------- | ---------------------------------------------- |
@@ -33,4 +33,4 @@ A module is easy to review when it follows these rules:
 
 ## Adding a module
 
-Copy [`docs/module-template/`](../docs/module-template/) and follow the step-by-step guide in [CONTRIBUTING.md](../CONTRIBUTING.md#adding-a-module).
+Copy [`docs/module-template/`](../../docs/module-template/) and follow the step-by-step guide in [CONTRIBUTING.md](../../CONTRIBUTING.md#adding-a-module).

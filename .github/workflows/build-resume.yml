@@ -4,7 +4,7 @@ name: Build Resume (reusable)
 # private one). It runs in the caller's repo, so logs, artifacts and generated
 # files stay wherever your CV lives. See README.md for a ready-made caller.
 #
-# The job runs in stages. Optional features are modules in actions/<name>/,
+# The job runs in stages. Optional features are modules in .github/actions/<name>/,
 # each a composite action that turns itself on when its input or secret is set:
 #
 #   1. Setup        check out the CV repo and this toolkit (at this exact commit)
@@ -99,7 +99,7 @@ jobs:
 
       # job.workflow_* describe this reusable workflow itself (not the caller),
       # so the modules always match the version the caller pinned. Modules are
-      # then used from this checkout as ./.resume-toolkit/actions/<name>.
+      # then used from this checkout as ./.resume-toolkit/.github/actions/<name>.
       - name: Checkout resume toolkit
         uses: actions/checkout@v4
         with:
@@ -140,7 +140,7 @@ jobs:
       # ── 2. Pre-render modules ─────────────────────────────────────────────
       - name: "[module] npm download stats"
         if: inputs.update_npm_stats
-        uses: ./.resume-toolkit/actions/npm-download-stats
+        uses: ./.resume-toolkit/.github/actions/npm-download-stats
         with:
           cv_file: ${{ inputs.cv_file }}
 
@@ -157,7 +157,7 @@ jobs:
       - name: "[module] Google Drive upload"
         id: drive
         if: steps.modules.outputs.drive == 'true'
-        uses: ./.resume-toolkit/actions/google-drive-upload
+        uses: ./.resume-toolkit/.github/actions/google-drive-upload
         with:
           file: ${{ steps.render.outputs.pdf_path }}
           credentials: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
@@ -186,7 +186,7 @@ jobs:
       # ── 6. Notify modules ─────────────────────────────────────────────────
       - name: "[module] Telegram notify"
         if: success() && steps.modules.outputs.telegram == 'true'
-        uses: ./.resume-toolkit/actions/telegram-notify
+        uses: ./.resume-toolkit/.github/actions/telegram-notify
         with:
           bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -196,7 +196,7 @@ jobs:
 
       - name: "[module] Telegram notify (failure)"
         if: failure() && inputs.telegram_notify_on_failure && steps.modules.outputs.telegram == 'true'
-        uses: ./.resume-toolkit/actions/telegram-notify
+        uses: ./.resume-toolkit/.github/actions/telegram-notify
         with:
           bot_token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           chat_id: ${{ secrets.TELEGRAM_CHAT_ID }}

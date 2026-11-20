@@ -21,7 +21,7 @@ It edits the CV YAML in place before RenderCV runs. An existing `(... downloads)
 
 ```yaml
 - uses: actions/checkout@v4
-- uses: EndLess728/resume-builder/actions/npm-download-stats@v1
+- uses: EndLess728/resume-builder/.github/actions/npm-download-stats@v1
   with:
     cv_file: My_CV.yaml
 ```
@@ -29,5 +29,5 @@ It edits the CV YAML in place before RenderCV runs. An existing `(... downloads)
 ## Run locally
 
 ```bash
-python3 actions/npm-download-stats/update_npm_stats.py My_CV.yaml
+python3 .github/actions/npm-download-stats/update_npm_stats.py My_CV.yaml
 ```

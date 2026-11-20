@@ -12,7 +12,7 @@ The pipeline is a **reusable workflow**. Your actual CV lives in a separate (pri
 ┌───────────────────────────┐   uses   ┌─────────────────────────────────────┐
 │ your private resume repo  │ ───────▶ │ EndLess728/resume-builder           │
 │  Your_CV.yaml             │          │  .github/workflows/build-resume.yml │
-│  .github/workflows/...    │          │  actions/  (optional modules)       │
+│  .github/workflows/...    │          │  .github/actions/  (modules)        │
 │  secrets: Drive, Telegram │          │  example_CV.yaml                    │
 └───────────────────────────┘          └─────────────────────────────────────┘
 ```
@@ -29,9 +29,9 @@ The core renders your YAML to PDF and PNG with RenderCV, saves it as a workflow 
 
 | Module                                                       | What it does                                                        |
 | ------------------------------------------------------------ | ------------------------------------------------------------------- |
-| [npm-download-stats](./actions/npm-download-stats/)          | Adds live npm download counts to entries that link to an npm package. On by default. |
-| [google-drive-upload](./actions/google-drive-upload/)        | Keeps the PDF on Google Drive behind one link that never changes.   |
-| [telegram-notify](./actions/telegram-notify/)                | Messages you when the resume is built, or when a build fails, optionally with the PDF. |
+| [npm-download-stats](./.github/actions/npm-download-stats/)          | Adds live npm download counts to entries that link to an npm package. On by default. |
+| [google-drive-upload](./.github/actions/google-drive-upload/)        | Keeps the PDF on Google Drive behind one link that never changes.   |
+| [telegram-notify](./.github/actions/telegram-notify/)                | Messages you when the resume is built, or when a build fails, optionally with the PDF. |
 
 Modules are plain composite actions, so you can also use them in other workflows. Want another one, like Slack or email? [Adding a module](./CONTRIBUTING.md#adding-a-module) takes a template and four small edits.
 
@@ -116,7 +116,7 @@ All optional. A module whose secrets are missing is skipped.
 | `TELEGRAM_BOT_TOKEN`       | Bot token from [@BotFather](https://t.me/BotFather). With the chat ID, turns on **telegram-notify**.                           |
 | `TELEGRAM_CHAT_ID`         | Chat to notify. Message your bot, then read `chat.id` from `https://api.telegram.org/bot<TOKEN>/getUpdates`.                  |
 
-The one-time Google setup (service account, sharing the file with it) is walked through in [`actions/google-drive-upload/SETUP.md`](./actions/google-drive-upload/SETUP.md).
+The one-time Google setup (service account, sharing the file with it) is walked through in [`.github/actions/google-drive-upload/SETUP.md`](./.github/actions/google-drive-upload/SETUP.md).
 
 > **Keep the CV repo private.** If you call this from a public repo, set `upload_artifact: false` and `commit_output: false`, since anyone can download artifacts and read commits there.
 

@@ -28,7 +28,7 @@ Inside `build-resume.yml` this becomes the workflow's `drive_url` output, and `t
 Works for any file, not just resumes:
 
 ```yaml
-- uses: EndLess728/resume-builder/actions/google-drive-upload@v1
+- uses: EndLess728/resume-builder/.github/actions/google-drive-upload@v1
   id: drive
   with:
     file: dist/report.pdf
@@ -42,5 +42,5 @@ Works for any file, not just resumes:
 ```bash
 pip install google-api-python-client google-auth
 export GOOGLE_DRIVE_CREDENTIALS="$(cat key.json)" GOOGLE_DRIVE_FILE_ID="<file id>"
-python3 actions/google-drive-upload/upload_to_drive.py rendercv_output/My_CV.pdf
+python3 .github/actions/google-drive-upload/upload_to_drive.py rendercv_output/My_CV.pdf
 ```
