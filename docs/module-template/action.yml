@@ -1,5 +1,5 @@
 # Template for a new resume-builder module.
-# Copy this folder to actions/<your-module-name>/ and replace every TODO.
+# Copy this folder to .github/actions/<your-module-name>/ and replace every TODO.
 # See CONTRIBUTING.md → "Adding a module" for the full walkthrough.
 
 name: TODO Module name

@@ -13,8 +13,8 @@
 
 - [ ] CI passes (lint + example render)
 - [ ] New behaviour is optional and off by default
-- [ ] New module follows the [module contract](../actions/README.md#the-module-contract) and has its own `README.md`
-- [ ] Module is listed in `actions/README.md`, and its secrets/inputs are in the main `README.md`
+- [ ] New module follows the [module contract](https://github.com/EndLess728/resume-builder/blob/main/.github/actions/README.md#the-module-contract) and has its own `README.md`
+- [ ] Module is listed in `.github/actions/README.md`, and its secrets/inputs are in the main `README.md`
 - [ ] `CHANGELOG.md` has a line under `## [Unreleased]`
 - [ ] No real CV, keys or personal data in the diff
 

@@ -5,8 +5,9 @@ name: Release
 #     (the workflow creates the tag on the selected branch's latest commit), or
 #   - push a tag yourself: git tag v1.2.0 && git push origin v1.2.0
 #
-# The workflow renders example_CV.yaml with that exact version, attaches the
-# sample PDF to a GitHub release, refreshes the README preview image
+# The workflow renders example_CV.yaml with that exact version, publishes a
+# GitHub release whose notes come from that version's CHANGELOG.md section,
+# attaches the sample PDF, refreshes the README preview image
 # (docs/sample-resume.png) on the default branch, and moves the major tag (v1)
 # so callers pinned to @v1 pick up the new version. Pre-release versions
 # (v1.2.0-rc.1) are published as pre-releases and leave the major tag alone.
@@ -99,29 +100,20 @@ jobs:
 
       - name: Create GitHub release
         run: |
-          MAJOR="${TAG%%.*}"
-          cat > notes.md <<EOF
-          ## Use this version
-
-          \`\`\`yaml
-          jobs:
-            build:
-              uses: ${GITHUB_REPOSITORY}/.github/workflows/build-resume.yml@${TAG}
-              with:
-                cv_file: Your_CV.yaml
-              secrets: inherit
-          \`\`\`
-
-          Pin \`@${TAG}\` for this exact version, or \`@${MAJOR}\` to get fixes and features without breaking changes.
-
-          The attached \`sample-resume.pdf\` was rendered from [\`example_CV.yaml\`](https://github.com/${GITHUB_REPOSITORY}/blob/${TAG}/example_CV.yaml) by this release.
-
-          EOF
-          sed -i 's/^          //' notes.md
+          # Notes come from this version's section in CHANGELOG.md. Without
+          # one, fall back to GitHub's generated list of commits.
+          notes_flags=()
+          if python3 .github/scripts/release_notes.py "$TAG" > notes.md; then
+            notes_flags+=(--notes-file notes.md)
+          else
+            echo "::warning::CHANGELOG.md has no section for $TAG; using generated notes"
+            notes_flags+=(--generate-notes)
+          fi
 
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists; refreshing its assets."
+            echo "Release $TAG already exists; refreshing its notes and asset."
             gh release upload "$TAG" assets/sample-resume.pdf --clobber
+            [ -s notes.md ] && gh release edit "$TAG" --notes-file notes.md
             exit 0
           fi
 
@@ -130,9 +122,8 @@ jobs:
 
           gh release create "$TAG" assets/sample-resume.pdf \
             --title "$TAG" \
-            --notes-file notes.md \
-            --generate-notes \
             --verify-tag \
+            "${notes_flags[@]}" \
             "${flags[@]}"
 
       - name: Refresh README preview

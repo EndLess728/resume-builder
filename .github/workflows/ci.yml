@@ -25,7 +25,7 @@ jobs:
       - name: Check module layout
         run: |
           status=0
-          for dir in actions/*/; do
+          for dir in .github/actions/*/; do
             for file in action.yml README.md; do
               if [ ! -f "$dir$file" ]; then
                 echo "::error file=$dir::Module $dir is missing $file"
@@ -36,7 +36,7 @@ jobs:
           exit $status
 
       - name: Compile Python
-        run: python3 -m py_compile actions/*/*.py docs/module-template/*.py
+        run: python3 -m py_compile .github/actions/*/*.py docs/module-template/*.py
 
   # Renders example_CV.yaml through the real reusable workflow. It loads the
   # modules from its own commit, so every change is tested end to end.

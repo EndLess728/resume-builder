@@ -8,13 +8,13 @@ Thanks for helping out. Fixes, docs and new modules are all welcome. This guide 
 your CV repo                          this repo (resume-builder)
 ────────────                          ──────────────────────────
 .github/workflows/resume.yml  ──uses──▶ .github/workflows/build-resume.yml   the pipeline
-Your_CV.yaml                            actions/<module>/                     optional modules
+Your_CV.yaml                            .github/actions/<module>/             optional modules
 secrets                                 example_CV.yaml                       sample used by CI and releases
 ```
 
 - **[`build-resume.yml`](.github/workflows/build-resume.yml)** is the reusable workflow people call. It runs in stages: setup → pre-render → render → publish → save → notify. The comment at the top of the file maps each stage to its modules.
-- **[`actions/`](actions/)** holds the modules. Each one is a self-contained composite action. [actions/README.md](actions/README.md) lists them and sets out the **module contract**; please read it before writing one.
-- The workflow checks out this repo at **its own commit** (`job.workflow_sha`) and uses modules from that checkout as `./.resume-toolkit/actions/<name>`. That's why someone pinned to `@v1.2.0` always runs v1.2.0's modules. Keep using that path inside `build-resume.yml`, not `EndLess728/resume-builder/actions/...@ref`.
+- **[`.github/actions/`](.github/actions/)** holds the modules. Each one is a self-contained composite action. [.github/actions/README.md](.github/actions/README.md) lists them and sets out the **module contract**; please read it before writing one.
+- The workflow checks out this repo at **its own commit** (`job.workflow_sha`) and uses modules from that checkout as `./.resume-toolkit/.github/actions/<name>`. That's why someone pinned to `@v1.2.0` always runs v1.2.0's modules. Keep using that path inside `build-resume.yml`, not `EndLess728/resume-builder/.github/actions/...@ref`.
 - **[`ci.yml`](.github/workflows/ci.yml)** lints everything and renders `example_CV.yaml` through the real pipeline on every pull request.
 - **[`release.yml`](.github/workflows/release.yml)** publishes versions (maintainers only, see below).
 
@@ -25,7 +25,7 @@ Say you want a `slack-notify` module.
 **1. Copy the template**
 
 ```bash
-cp -r docs/module-template actions/slack-notify
+cp -r docs/module-template .github/actions/slack-notify
 ```
 
 You get `action.yml`, `run.py` and `README.md`, each with `TODO`s to fill in.
@@ -34,7 +34,7 @@ You get `action.yml`, `run.py` and `README.md`, each with `TODO`s to fill in.
 
 - Fill in `action.yml`: name, description, inputs, outputs.
 - Put the logic in `run.py` (rename it if you like). Use the standard library where you can.
-- Follow the [module contract](actions/README.md#the-module-contract): self-contained folder, inputs in and outputs out, notify modules never fail the build.
+- Follow the [module contract](.github/actions/README.md#the-module-contract): self-contained folder, inputs in and outputs out, notify modules never fail the build.
 
 **3. Wire it into `build-resume.yml`**
 
@@ -64,7 +64,7 @@ Four small edits, all in [`build-resume.yml`](.github/workflows/build-resume.yml
 # d) Add the step under the right stage heading
       - name: "[module] Slack notify"
         if: success() && steps.modules.outputs.slack == 'true'
-        uses: ./.resume-toolkit/actions/slack-notify
+        uses: ./.resume-toolkit/.github/actions/slack-notify
         with:
           file: ${{ steps.render.outputs.pdf_path }}
           webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -76,7 +76,7 @@ If your module produces something useful (a URL, say), add it to the job's `outp
 **4. Document it**
 
 - Finish the module's `README.md`.
-- Add a row to the table in [actions/README.md](actions/README.md).
+- Add a row to the table in [.github/actions/README.md](.github/actions/README.md).
 - Add its secret and inputs to the tables in the main [README.md](README.md).
 - Add a line under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md).
 
@@ -86,7 +86,7 @@ If your module produces something useful (a URL, say), add it to the job's `outp
 
 ```bash
 pipx run actionlint -ignore 'property "workflow_(repository|sha)" is not defined'
-python3 -m py_compile actions/*/*.py
+python3 -m py_compile .github/actions/*/*.py
 ```
 
 (Older actionlint versions don't know `job.workflow_sha` yet, hence the ignore.)
@@ -95,7 +95,7 @@ python3 -m py_compile actions/*/*.py
 
 ```bash
 pipx install "rendercv[full]>=2.6"
-python3 actions/npm-download-stats/update_npm_stats.py example_CV.yaml
+python3 .github/actions/npm-download-stats/update_npm_stats.py example_CV.yaml
 rendercv render example_CV.yaml
 ```
 
@@ -124,4 +124,6 @@ Mention in your pull request that you tested it this way.
 1. Move the `## [Unreleased]` notes in `CHANGELOG.md` under a new version heading and merge to `main`.
 2. **Actions → Release → Run workflow**, version `vX.Y.Z`.
 
-The release workflow tags the commit, renders the sample with that version, publishes the release with `sample-resume.pdf`, refreshes `docs/sample-resume.png`, and moves the major tag (`v1`). Versions follow [SemVer](https://semver.org/): a new optional module is a minor version, and anything that breaks existing callers needs a new major version.
+The release workflow tags the commit, renders the sample with that version, publishes the release with that version's `CHANGELOG.md` section as its notes and `sample-resume.pdf` attached, refreshes `docs/sample-resume.png`, and moves the major tag (`v1`).
+
+Spotted a mistake in a released version's notes? Fix `CHANGELOG.md`, merge, then run **Actions → Sync release notes** (one version, or leave it empty for all). Versions follow [SemVer](https://semver.org/): a new optional module is a minor version, and anything that breaks existing callers needs a new major version.

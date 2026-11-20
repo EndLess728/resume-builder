@@ -26,7 +26,7 @@ TODO: two or three sentences on what the module does and why someone would turn 
 ## Use it on its own
 
 ```yaml
-- uses: EndLess728/resume-builder/actions/TODO-module-name@v1
+- uses: EndLess728/resume-builder/.github/actions/TODO-module-name@v1
   with:
     file: path/to/file.pdf
     token: ${{ secrets.TODO_SECRET }}
@@ -35,5 +35,5 @@ TODO: two or three sentences on what the module does and why someone would turn 
 ## Run locally
 
 ```bash
-TOKEN=... python3 actions/TODO-module-name/run.py path/to/file.pdf
+TOKEN=... python3 .github/actions/TODO-module-name/run.py path/to/file.pdf
 ```
