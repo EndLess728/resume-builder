@@ -1,0 +1,113 @@
+---
+title: Google Drive upload
+description: The google-drive-upload module keeps your resume PDF on Google Drive behind one permanent link, updated in place on every build. Includes the one-time service account setup.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+**Stage:** publish · **Enabled by:** the `GOOGLE_DRIVE_CREDENTIALS` secret
+
+Uploads the rendered PDF to Google Drive with a service account. With a file ID set, it updates the **same Drive file** every time, so the share link you put on your portfolio or LinkedIn never changes.
+
+## One-time setup
+
+### 1. Create a service account
+
+<Steps>
+
+1. Open the [Google Cloud Console](https://console.cloud.google.com/) and create a project (or use an existing one).
+
+2. Enable the **Google Drive API**: **APIs & Services → Enable APIs and Services**, search for "Google Drive API", and enable it.
+
+3. Create a service account: **APIs & Services → Credentials → Create Credentials → Service Account**. Name it something like `resume-uploader`, then **Create and Continue → Done**.
+
+4. Create a key: open the service account, go to **Keys → Add Key → Create new key**, choose **JSON**, and download it. Keep it safe and never commit it.
+
+</Steps>
+
+The service account's email (the `client_email` field in the JSON, e.g. `resume-uploader@your-project.iam.gserviceaccount.com`) is what you share Drive items with next.
+
+### 2. Upload the resume and share it
+
+<Steps>
+
+1. Render the PDF ([locally](../../guides/render-locally/) or from a first build) and upload it to [Google Drive](https://drive.google.com/).
+
+2. Right-click the file → **Share**:
+   - Add the service account email with **Editor** permission. Without this, the upload fails with `File not found`.
+   - Under **General access**, choose **Anyone with the link → Viewer**.
+
+3. Copy the file ID from the URL: `https://drive.google.com/file/d/YOUR_FILE_ID/view`. **This ID is what keeps the link permanent.**
+
+</Steps>
+
+:::note[Why update an existing file?]
+Service accounts have no Drive storage quota of their own, so creating a file in a personal (non-shared) folder can be rejected. Updating a file you own works, and keeps the same link.
+:::
+
+### 3. Add the secrets
+
+In your CV repo, go to **Settings → Secrets and variables → Actions**:
+
+| Secret | Value |
+| --- | --- |
+| `GOOGLE_DRIVE_CREDENTIALS` | Entire contents of the JSON key file |
+| `GOOGLE_DRIVE_FILE_ID` | The file ID from step 2 |
+| `GOOGLE_DRIVE_FOLDER_ID` | Only needed without a file ID, see below |
+
+Then run **Actions → Resume → Run workflow**.
+
+### Optional: folder fallback
+
+If `GOOGLE_DRIVE_FILE_ID` isn't set, the module creates a new file in a folder and makes it public. It prints the new file ID, which you should then save as `GOOGLE_DRIVE_FILE_ID`. To use this path, create a folder, share it with the service account (**Editor**), and save its ID from `https://drive.google.com/drive/folders/YOUR_FOLDER_ID` as `GOOGLE_DRIVE_FOLDER_ID`.
+
+## Your permanent links
+
+| Format | URL |
+| --- | --- |
+| **View** | `https://drive.google.com/file/d/YOUR_FILE_ID/view` |
+| **Download** | `https://drive.google.com/uc?export=download&id=YOUR_FILE_ID` |
+| **Embed** | `https://drive.google.com/file/d/YOUR_FILE_ID/preview` |
+
+Use the **View** link on your portfolio for the best experience.
+
+## Inputs (standalone use)
+
+| Input | Required | Description |
+| --- | --- | --- |
+| `file` | yes | Path of the file to upload. |
+| `credentials` | yes | Full contents of a Google Cloud service-account JSON key. |
+| `file_id` | no | Existing Drive file to update in place. Recommended: keeps the link stable. |
+| `folder_id` | no | Folder to create a new, publicly readable file in. Used only when `file_id` is empty. |
+
+## Outputs
+
+| Output | Description |
+| --- | --- |
+| `url` | View URL of the uploaded file. |
+
+Inside `build-resume.yml` this becomes the workflow's [`drive_url` output](../../guides/outputs/), and Telegram notify links to it.
+
+## Use it on its own
+
+Works for any file, not just resumes:
+
+```yaml
+- uses: EndLess728/resume-builder/.github/actions/google-drive-upload@v1
+  id: drive
+  with:
+    file: dist/report.pdf
+    credentials: ${{ secrets.GOOGLE_DRIVE_CREDENTIALS }}
+    file_id: ${{ secrets.GOOGLE_DRIVE_FILE_ID }}
+- run: echo "Uploaded to ${{ steps.drive.outputs.url }}"
+```
+
+## Run locally
+
+```bash
+pip install google-api-python-client google-auth
+export GOOGLE_DRIVE_CREDENTIALS="$(cat key.json)" GOOGLE_DRIVE_FILE_ID="<file id>"
+python3 .github/actions/google-drive-upload/upload_to_drive.py rendercv_output/My_CV.pdf
+```
+
+Something not working? See [Troubleshooting](../../guides/troubleshooting/#google-drive).

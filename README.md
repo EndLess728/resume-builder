@@ -3,8 +3,11 @@
 [![Latest release](https://img.shields.io/github/v/release/EndLess728/resume-builder?sort=semver)](https://github.com/EndLess728/resume-builder/releases/latest)
 [![CI](https://github.com/EndLess728/resume-builder/actions/workflows/ci.yml/badge.svg)](https://github.com/EndLess728/resume-builder/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Docs](https://img.shields.io/badge/docs-endless728.github.io-0b7285)](https://endless728.github.io/resume-builder/)
 
 Write your resume as YAML, and let GitHub Actions turn it into a PDF, keep it up to date on Google Drive behind one permanent link, and ping you on Telegram when it's done. Built on [RenderCV](https://github.com/rendercv/rendercv).
+
+**📖 Documentation: [endless728.github.io/resume-builder](https://endless728.github.io/resume-builder/)**
 
 The pipeline is a **reusable workflow**. Your actual CV lives in a separate (private) repo that calls it. That keeps your phone number, email and generated PDFs out of public view: logs, artifacts and commits all happen in your private repo, while the code lives here in one place.
 

@@ -1,0 +1,64 @@
+# Builds the documentation site in website/ and deploys it to GitHub Pages:
+# https://endless728.github.io/resume-builder/
+name: Deploy docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "website/**"
+      - "CHANGELOG.md"
+      - "docs/sample-resume.png"
+      - ".github/workflows/docs.yml"
+  # The release workflow commits a fresh docs/sample-resume.png with
+  # GITHUB_TOKEN, which doesn't trigger push workflows, so redeploy after it.
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # After a release, build from the latest main (with the new preview
+          # image), not the commit the release ran on.
+          ref: ${{ github.event_name == 'workflow_run' && github.event.repository.default_branch || '' }}
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - run: npm ci
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: website/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

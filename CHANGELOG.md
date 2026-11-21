@@ -6,6 +6,10 @@ or an exact tag such as `@v1.0.0` for a fixed version.
 
 ## [Unreleased]
 
+### Added
+
+- Documentation site at [endless728.github.io/resume-builder](https://endless728.github.io/resume-builder/), built from `website/` with Starlight and deployed to GitHub Pages by the new `docs.yml` workflow.
+
 ## [1.2.1] - 2026-11-20
 
 ### Fixed

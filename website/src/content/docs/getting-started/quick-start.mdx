@@ -1,0 +1,48 @@
+---
+title: Quick start
+description: Create a private resume repo from resume-builder-template, check the first build, and replace the example with your own CV.
+---
+
+import { Steps, LinkButton } from '@astrojs/starlight/components';
+
+The fastest way to start is [resume-builder-template](https://github.com/EndLess728/resume-builder-template), a ready-made repo with the workflow and an example CV already in place.
+
+<LinkButton href="https://github.com/new?template_name=resume-builder-template&template_owner=EndLess728" icon="external">Use this template</LinkButton>
+
+<Steps>
+
+1. **Create your repo from the template**
+
+   Click the button above (or **Use this template** on the template repo) and choose **Private**. Your resume has your phone number and email on it, and in a private repo the logs, artifacts and PDFs stay private too.
+
+2. **Check the first build**
+
+   Your new repo builds the example resume straight away. Its **Actions** tab should show a green run, and the PDF appears in `rendercv_output/`.
+
+3. **Make it yours**
+
+   Edit `My_CV.yaml` with your details and push. Every push rebuilds the PDF. See [Writing your CV](../writing-your-cv/) for the format.
+
+4. **Optional: turn on modules**
+
+   Add the [Drive or Telegram secrets](../../reference/secrets/) under **Settings → Secrets and variables → Actions**, then run **Actions → Resume → Run workflow**.
+
+</Steps>
+
+Want to see a finished setup before you start? The template builds its own example resume, so you can browse its [workflow runs](https://github.com/EndLess728/resume-builder-template/actions) and [generated PDF](https://github.com/EndLess728/resume-builder-template/tree/main/rendercv_output).
+
+## When it rebuilds
+
+The template's workflow runs:
+
+- on every push to `main` that changes `My_CV.yaml`,
+- once a week, to refresh npm download counts,
+- whenever you click **Run workflow**.
+
+Change the triggers in `.github/workflows/resume.yml` if you want something different.
+
+## Next steps
+
+- [Google Drive upload](../../modules/google-drive-upload/): a permanent link to your latest PDF.
+- [Telegram notify](../../modules/telegram-notify/): a message on every build.
+- [Render locally](../../guides/render-locally/): preview changes before you push.

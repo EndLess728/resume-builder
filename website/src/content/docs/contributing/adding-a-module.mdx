@@ -1,0 +1,73 @@
+---
+title: Adding a module
+description: Add a new optional module to resume-builder, such as Slack or email notifications, from the module template in four small edits.
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Say you want a `slack-notify` module. Read the [module contract](../architecture/#the-module-contract) first.
+
+<Steps>
+
+1. **Copy the template**
+
+   ```bash
+   cp -r docs/module-template .github/actions/slack-notify
+   ```
+
+   You get `action.yml`, `run.py` and `README.md`, each with `TODO`s to fill in.
+
+2. **Write the module**
+
+   - Fill in `action.yml`: name, description, inputs, outputs.
+   - Put the logic in `run.py` (rename it if you like). Use the standard library where you can.
+   - Follow the contract: self-contained folder, inputs in and outputs out, notify modules never fail the build.
+
+3. **Wire it into `build-resume.yml`**
+
+   Four small edits, all in [`build-resume.yml`](https://github.com/EndLess728/resume-builder/blob/main/.github/workflows/build-resume.yml):
+
+   ```yaml
+   # a) Declare the secret, tagged with the module name
+       secrets:
+         SLACK_WEBHOOK_URL:
+           description: "[slack-notify] Incoming webhook URL. Enables the module."
+           required: false
+
+   # b) Add any settings as inputs, tagged the same way (optional)
+         slack_mention:
+           description: "[slack-notify] User or group to @mention"
+           type: string
+           default: ""
+
+   # c) Detect whether it's on, in the "Detect enabled modules" step
+           env:
+             SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+           run: |
+             ...
+             if [ -n "$SLACK_WEBHOOK_URL" ]; then enable slack
+             else skip slack "SLACK_WEBHOOK_URL not set"; fi
+
+   # d) Add the step under the right stage heading
+         - name: "[module] Slack notify"
+           if: success() && steps.modules.outputs.slack == 'true'
+           uses: ./.resume-toolkit/.github/actions/slack-notify
+           with:
+             file: ${{ steps.render.outputs.pdf_path }}
+             webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
+             drive_url: ${{ steps.drive.outputs.url }}
+   ```
+
+   If your module produces something useful (a URL, say), add it to the job's `outputs` and to `on.workflow_call.outputs` so callers can use it too.
+
+4. **Document it**
+
+   - Finish the module's `README.md`.
+   - Add a row to the table in [`.github/actions/README.md`](https://github.com/EndLess728/resume-builder/blob/main/.github/actions/README.md).
+   - Add its secret and inputs to the tables in the main `README.md`.
+   - Add a page under `website/src/content/docs/modules/`, list it in the sidebar in `website/astro.config.mjs`, and add it to the [Secrets](../../reference/secrets/) and [Inputs & outputs](../../reference/inputs-outputs/) pages.
+   - Add a line under `## [Unreleased]` in `CHANGELOG.md`.
+
+</Steps>
+
+Then [test it end to end](../testing/) from your fork.

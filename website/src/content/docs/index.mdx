@@ -1,0 +1,75 @@
+---
+title: resume-builder
+description: Write your resume as YAML and let GitHub Actions render it to PDF with RenderCV, keep it on Google Drive behind one permanent link, and ping you on Telegram when it's done.
+template: splash
+hero:
+  tagline: Write your resume as YAML. GitHub Actions turns it into a PDF on every push, keeps it on Google Drive behind one link that never changes, and pings you on Telegram when it's done.
+  image:
+    file: ../../assets/logo.svg
+  actions:
+    - text: Get started
+      link: getting-started/quick-start/
+      icon: right-arrow
+    - text: Use the template
+      link: https://github.com/new?template_name=resume-builder-template&template_owner=EndLess728
+      icon: external
+      variant: secondary
+    - text: View on GitHub
+      link: https://github.com/EndLess728/resume-builder
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+```yaml
+# .github/workflows/resume.yml in your private CV repo
+jobs:
+  build:
+    uses: EndLess728/resume-builder/.github/workflows/build-resume.yml@v1
+    with:
+      cv_file: My_CV.yaml
+    secrets: inherit
+```
+
+Your CV lives in your own **private** repo, which calls this reusable workflow. Logs, artifacts and generated PDFs all stay there, while the pipeline code lives in one public place. Built on [RenderCV](https://github.com/rendercv/rendercv).
+
+## What you get
+
+<CardGrid>
+  <Card title="YAML to PDF" icon="document">
+    RenderCV renders your YAML to a typeset PDF and PNG previews on every push, saves them as an artifact and commits them back to your repo.
+  </Card>
+  <Card title="One permanent link" icon="external">
+    The Google Drive module updates the same file in place, so the link on your portfolio or LinkedIn never changes.
+  </Card>
+  <Card title="Telegram pings" icon="comment">
+    Get a message when the resume is rebuilt, optionally with the PDF attached, and another if a build fails.
+  </Card>
+  <Card title="Live npm stats" icon="npm">
+    Entries that link to an npm package get a fresh download count, refreshed by a weekly scheduled build.
+  </Card>
+  <Card title="Private by design" icon="seti:lock">
+    Your phone number and email never touch a public repo. Everything runs in yours.
+  </Card>
+  <Card title="Pinned and versioned" icon="approve-check">
+    Pin `@v1` for compatible updates. Modules always load from the same commit as the workflow you pinned.
+  </Card>
+</CardGrid>
+
+## Sample output
+
+This is [`example_CV.yaml`](https://github.com/EndLess728/resume-builder/blob/main/example_CV.yaml) rendered by the latest release. [Download the sample PDF](https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume.pdf).
+
+<a href="https://github.com/EndLess728/resume-builder/releases/latest/download/sample-resume.pdf">
+  <img src="/resume-builder/sample-resume.png" alt="Sample resume rendered from example_CV.yaml" width="600" style="border-radius: 0.5rem; box-shadow: var(--sl-shadow-md);" />
+</a>
+
+## Next steps
+
+<CardGrid>
+  <LinkCard title="Quick start" description="Create your private CV repo from the template and get a PDF in minutes." href="getting-started/quick-start/" />
+  <LinkCard title="Modules" description="Google Drive, Telegram and npm stats: what each does and how to turn it on." href="modules/overview/" />
+  <LinkCard title="Inputs & outputs" description="Every option the workflow accepts and what it gives back." href="reference/inputs-outputs/" />
+  <LinkCard title="Adding a module" description="Want Slack or email? A template and four small edits." href="contributing/adding-a-module/" />
+</CardGrid>
