@@ -152,6 +152,13 @@ Output goes to `rendercv_output/`. If `rendercv --version` shows something older
 
 Pull requests are welcome. [CONTRIBUTING.md](./CONTRIBUTING.md) explains how the pipeline is laid out, how to add a module, how to test with your own secrets from a fork, and how releases work. [`ci.yml`](./.github/workflows/ci.yml) lints every pull request and renders `example_CV.yaml` through the real pipeline.
 
+## Support the Project
+
+If this workflow has saved you time, consider supporting its development:
+
+[![Buy Me a Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-Support%20the%20author-f97316?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://www.buymeacoffee.com/mantu.728)
+[![Donate via PayPal](https://img.shields.io/badge/Donate-PayPal-003087?style=for-the-badge&logo=paypal&logoColor=white)](https://paypal.me/Monty728)
+
 ## License
 
 [MIT](./LICENSE)

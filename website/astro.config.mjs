@@ -17,7 +17,7 @@ export default defineConfig({
         'Write your resume as YAML and let GitHub Actions render it to PDF with RenderCV, keep it on Google Drive behind one permanent link, and notify you on Telegram. A reusable workflow you call from your own private repo.',
       logo: { src: './src/assets/logo.svg' },
       favicon: '/favicon.svg',
-      social: [{ icon: 'github', label: 'GitHub', href: REPO }],
+      social: [{ icon: 'github', label: 'GitHub', href: REPO }, { icon: 'heart', label: 'Buy me a coffee', href: 'https://www.buymeacoffee.com/mantu.728' }],
       editLink: { baseUrl: `${REPO}/edit/main/website/` },
       lastUpdated: true,
       head: [
@@ -114,6 +114,7 @@ export default defineConfig({
             { label: 'Releasing', slug: 'contributing/releasing' },
           ],
         },
+        { label: 'Support the project ☕', slug: 'support' },
       ],
     }),
   ],

@@ -36,6 +36,10 @@ Everything beyond rendering is a module that turns itself on when you set its se
 
 Modules are plain composite actions, so you can use them in other workflows too.
 
+## Support
+
+`resume-builder` is free and open source. If it saves you time, you can [buy me a coffee](https://www.buymeacoffee.com/mantu.728) or [donate via PayPal](https://paypal.me/Monty728). See [Support the project](../../support/) for other ways to help.
+
 ## Next
 
 [Quick start](../quick-start/) walks you through creating your repo from the template.
