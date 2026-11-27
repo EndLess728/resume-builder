@@ -6,6 +6,10 @@ or an exact tag such as `@v1.0.0` for a fixed version.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-11-27
+
+Web builder only; the workflow is unchanged.
+
 ### Added
 
 - **Upload old resume** in the web builder: drop in a PDF, Word (.docx) or text resume and the form fills itself in (contact details, summary, jobs, education, skills, projects and other sections), ready to check and edit. Files are read in the browser and never uploaded. Scanned PDFs (images with no text) can't be read.
@@ -79,6 +83,7 @@ First public release.
 - The workflow loads its scripts from its own commit, so a pinned version always runs matching scripts.
 - `example_CV.yaml`, rendered and attached to every release as a sample.
 
+[1.4.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.4.0
 [1.3.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.3.0
 [1.2.1]: https://github.com/EndLess728/resume-builder/releases/tag/v1.2.1
 [1.2.0]: https://github.com/EndLess728/resume-builder/releases/tag/v1.2.0
