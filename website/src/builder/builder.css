@@ -58,13 +58,6 @@
 .rb-notice ul { margin: 0.4rem 0 0 1.1rem; padding: 0; }
 .rb-notice.rb-warn { border-color: var(--sl-color-orange, #c80); }
 .rb-notice.rb-error { border-color: var(--rb-danger); }
-.rb-hello {
-  padding: 0.85rem 1rem;
-  border-radius: var(--rb-radius);
-  background: var(--sl-color-accent-low);
-  color: var(--sl-color-white);
-  line-height: 1.5;
-}
 
 /* layout */
 .rb-split {
@@ -261,7 +254,82 @@
 @keyframes rb-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .rb-spinner { animation-duration: 2s; } }
 
-.rb-dragging .rb-form { outline: 2px dashed var(--sl-color-accent); outline-offset: 6px; border-radius: var(--rb-radius); }
+/* upload drop zone */
+.rb-drop {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 2px dashed var(--rb-border);
+  border-radius: var(--rb-radius);
+  background: var(--rb-card);
+  color: var(--sl-color-gray-2);
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s, transform 0.15s;
+}
+.rb-drop:hover,
+.rb-drop:focus-visible { border-color: var(--sl-color-accent); outline: none; }
+.rb-drop:focus-visible { box-shadow: 0 0 0 3px var(--sl-color-accent-low); }
+.rb-drop-large {
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: 2.25rem 1.5rem;
+  min-height: 13rem;
+}
+.rb-drop-compact { padding: 0.7rem 1rem; }
+.rb-drop-icon { flex: none; color: var(--sl-color-accent); }
+.rb-drop-large .rb-drop-icon { width: 3rem; height: 3rem; }
+.rb-drop-compact .rb-drop-icon { width: 1.6rem; height: 1.6rem; }
+.rb-drop-text { display: flex; flex-direction: column; gap: 0.25rem; line-height: 1.4; }
+.rb-drop-text strong { color: var(--sl-color-white); }
+.rb-drop-large .rb-drop-text strong { font-size: var(--sl-text-lg); }
+.rb-drop-text u { color: var(--sl-color-text-accent); text-underline-offset: 2px; }
+.rb-drop-note { font-size: var(--sl-text-xs); color: var(--rb-muted); margin-top: 0.35rem; }
+.rb-drop-compact .rb-drop-text { font-size: var(--sl-text-xs); }
+.rb-drop-compact .rb-drop-text strong { font-size: var(--sl-text-sm); }
+.rb-drop.rb-drop-active {
+  border-style: solid;
+  border-color: var(--sl-color-accent);
+  background: var(--sl-color-accent-low);
+}
+.rb-drop-large.rb-drop-active { transform: scale(1.01); }
+.rb-drop-busy { cursor: progress; border-style: solid; }
+.rb-drop-alt { color: var(--rb-muted); font-size: var(--sl-text-xs); text-align: center; margin-top: -0.4rem !important; }
+.rb-drop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: color-mix(in srgb, var(--sl-color-black) 55%, transparent);
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+  animation: rb-fade 0.12s ease-out;
+}
+.rb-drop-overlay > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  align-items: center;
+  padding: 2.5rem 3.5rem;
+  border: 3px dashed var(--sl-color-accent);
+  border-radius: 1rem;
+  background: var(--sl-color-bg);
+  color: var(--rb-muted);
+  font-size: var(--sl-text-sm);
+}
+.rb-drop-overlay strong { color: var(--sl-color-white); font-size: var(--sl-text-xl); }
+@keyframes rb-fade { from { opacity: 0; } }
+.rb-touch-only { display: none; }
+@media (hover: none) and (pointer: coarse) {
+  .rb-pointer-only { display: none; }
+  .rb-touch-only { display: inline; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rb-drop, .rb-drop-overlay { transition: none; animation: none; }
+  .rb-drop-large.rb-drop-active { transform: none; }
+}
 
 /* mobile: one pane at a time, switched by the bottom tabs */
 .rb-tabs { display: none; }
