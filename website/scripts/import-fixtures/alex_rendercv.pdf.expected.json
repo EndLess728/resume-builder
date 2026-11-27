@@ -1,0 +1,146 @@
+{
+  "resume": {
+    "version": 1,
+    "header": {
+      "name": "Alex Rivera",
+      "headline": "Senior Mobile Engineer",
+      "location": "London, UK",
+      "email": "alex.rivera@example.com",
+      "phone": "+44 20 7946 0958",
+      "website": "",
+      "linkedin": "example",
+      "github": "example"
+    },
+    "sections": [
+      {
+        "title": "Profile Summary",
+        "kind": "text",
+        "text": "Mobile engineer with 7 years building cross-platform apps in React Native and Expo, from prototype to 200K+ users. Focused on performance, Swift and Kotlin native modules, and release pipelines that let teams ship weekly."
+      },
+      {
+        "title": "Skills",
+        "kind": "skills",
+        "items": [
+          {
+            "label": "Languages",
+            "details": "TypeScript, JavaScript, Swift, Kotlin, SQL"
+          },
+          {
+            "label": "Mobile",
+            "details": "React Native, Expo, Expo Router, EAS Build & Update, Native Modules, Reanimated"
+          },
+          {
+            "label": "Data & State",
+            "details": "GraphQL, REST, TanStack Query, Zustand, Redux Toolkit, SQLite, WebSockets"
+          },
+          {
+            "label": "Tooling",
+            "details": "Jest, React Native Testing Library, Detox, Maestro, GitHub Actions, Firebase, Sentry"
+          }
+        ]
+      },
+      {
+        "title": "Experience",
+        "kind": "experience",
+        "items": [
+          {
+            "position": "Senior Mobile Engineer",
+            "company": "Example Corp",
+            "location": "London, UK",
+            "start": "2022-03",
+            "end": "present",
+            "summary": "",
+            "highlights": "Lead a team of 5 engineers shipping a React Native banking app to 200K+ monthly users with a 99.8% crash-free rate\nCut cold-start time by 30% by moving to the New Architecture and lazy-loading heavy screens\nAutomated iOS and Android releases with EAS Build and GitHub Actions, cutting release day from 4 hours to 20 min\nIntroduced Detox and Maestro end-to-end suites that run on every pull request and block regressions before release"
+          },
+          {
+            "position": "Mobile Developer",
+            "company": "Sample Studio",
+            "location": "Austin, TX",
+            "start": "2019-06",
+            "end": "2022-02",
+            "summary": "",
+            "highlights": "Built 3 client apps from scratch in React Native, from design hand-off to App Store and Google Play release\nWrote Swift and Kotlin modules for background location, push notifications and in-app purchases\nAdded offline-first sync with SQLite and a background queue, so field workers could use the app without signal"
+          },
+          {
+            "position": "Junior iOS Developer",
+            "company": "Placeholder Labs",
+            "location": "Austin, TX",
+            "start": "2018-01",
+            "end": "2019-05",
+            "summary": "",
+            "highlights": "Maintained a Swift event-ticketing app and migrated its main flows to React Native\nRaised unit test coverage from 20% to 65% on the checkout and payments code"
+          }
+        ]
+      },
+      {
+        "title": "Projects",
+        "kind": "projects",
+        "items": [
+          {
+            "name": "Trailmate",
+            "url": "https://example.com/trailmate",
+            "location": "",
+            "start": "",
+            "end": "",
+            "summary": "Offline hiking companion with GPS tracking and downloadable maps",
+            "highlights": "Built map tile caching and battery-friendly location tracking in Expo, reaching 4.8 stars across 10K+ installs"
+          },
+          {
+            "name": "Splitwise Lite",
+            "url": "https://example.com/split",
+            "location": "",
+            "start": "",
+            "end": "",
+            "summary": "Expense splitting for groups, with real-time sync between devices",
+            "highlights": "Designed a conflict-free sync model over WebSockets so edits on two phones never overwrite each other"
+          }
+        ]
+      },
+      {
+        "title": "Open Source",
+        "kind": "projects",
+        "items": [
+          {
+            "name": "left-pad",
+            "url": "https://www.npmjs.com/package/left-pad",
+            "location": "",
+            "start": "",
+            "end": "",
+            "summary": "String left pad, used here only to demo the npm download counter",
+            "highlights": "Replace this with your own package"
+          }
+        ]
+      },
+      {
+        "title": "Education",
+        "kind": "education",
+        "items": [
+          {
+            "institution": "State University",
+            "degree": "BSc",
+            "area": "Computer Science",
+            "location": "",
+            "start": "",
+            "end": "2017-05",
+            "summary": "",
+            "highlights": ""
+          }
+        ]
+      }
+    ]
+  },
+  "found": [
+    "name",
+    "email",
+    "phone",
+    "linkedin",
+    "github",
+    "location",
+    "summary",
+    "skills",
+    "3 jobs",
+    "1 education entry",
+    "3 projects"
+  ],
+  "warnings": []
+}

@@ -1,0 +1,84 @@
+{
+  "resume": {
+    "version": 1,
+    "header": {
+      "name": "Simran Kaur",
+      "headline": "HR Executive",
+      "location": "Ludhiana",
+      "email": "simran.kaur@example.com",
+      "phone": "+91 90000 11111",
+      "website": "",
+      "linkedin": "",
+      "github": ""
+    },
+    "sections": [
+      {
+        "title": "Objective",
+        "kind": "text",
+        "text": "To grow as an HR professional in a people-first company."
+      },
+      {
+        "title": "Experience",
+        "kind": "experience",
+        "items": [
+          {
+            "position": "HR Executive",
+            "company": "Vardhman Textiles",
+            "location": "Ludhiana",
+            "start": "2021-04",
+            "end": "present",
+            "summary": "",
+            "highlights": "Handled hiring for 120+ factory and office roles a year\nRan onboarding and monthly payroll inputs for 600 employees"
+          }
+        ]
+      },
+      {
+        "title": "Education",
+        "kind": "education",
+        "items": [
+          {
+            "institution": "Punjab University",
+            "degree": "MBA",
+            "area": "HR",
+            "location": "",
+            "start": "",
+            "end": "2021",
+            "summary": "",
+            "highlights": ""
+          },
+          {
+            "institution": "GGDSD College",
+            "degree": "",
+            "area": "BBA",
+            "location": "Chandigarh",
+            "start": "",
+            "end": "2019",
+            "summary": "",
+            "highlights": ""
+          }
+        ]
+      },
+      {
+        "title": "Skills",
+        "kind": "skills",
+        "items": [
+          {
+            "label": "Skills",
+            "details": "Recruitment, Onboarding, Payroll, MS Excel, Employee Engagement"
+          }
+        ]
+      }
+    ]
+  },
+  "found": [
+    "name",
+    "email",
+    "phone",
+    "location",
+    "summary",
+    "skills",
+    "1 job",
+    "2 education entries"
+  ],
+  "warnings": []
+}
