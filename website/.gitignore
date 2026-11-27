@@ -5,3 +5,5 @@ dist/
 # Copied in from the repo by scripts/sync.mjs before each build.
 public/sample-resume.png
 src/content/docs/reference/changelog.md
+src/builder/example_CV.yaml
+.scratch/

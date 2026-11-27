@@ -1,0 +1,43 @@
+---
+import StarlightPage from '@astrojs/starlight/components/StarlightPage.astro';
+import Builder from '../builder/ui/Builder.tsx';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<StarlightPage
+  frontmatter={{
+    title: 'Resume builder',
+    description:
+      'Fill in a form and get a live preview of your resume, then download it as a PDF. No GitHub account needed. Everything stays in your browser.',
+    template: 'splash',
+    editUrl: false,
+    lastUpdated: false,
+    pagefind: true,
+  }}
+>
+  <p class="rb-intro">
+    Fill in the form and watch your resume update as you type. Download the PDF when you're done. No GitHub account or
+    setup needed, and nothing leaves your browser. It's the same layout the <a href={`${base}getting-started/introduction/`}
+      >GitHub workflow</a
+    > produces, and <strong>Download YAML</strong> gives you a file for it.
+  </p>
+  <div class="not-content">
+    <Builder client:only="react" />
+  </div>
+  <noscript><p>The builder needs JavaScript to run.</p></noscript>
+</StarlightPage>
+
+<style is:global>
+  /* Give the builder the full window width instead of the reading column. */
+  :root:has(.rb-app) {
+    --sl-content-width: 100%;
+  }
+  :root:has(.rb-app) .content-panel {
+    padding-inline: clamp(1rem, 3vw, 2.5rem);
+  }
+  .rb-intro {
+    max-width: 52rem;
+    color: var(--sl-color-gray-2);
+  }
+</style>

@@ -8,6 +8,7 @@ on:
     paths:
       - "website/**"
       - "CHANGELOG.md"
+      - "example_CV.yaml"
       - "docs/sample-resume.png"
       - ".github/workflows/docs.yml"
   # The release workflow commits a fresh docs/sample-resume.png with

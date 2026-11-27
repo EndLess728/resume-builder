@@ -8,6 +8,7 @@ or an exact tag such as `@v1.0.0` for a fixed version.
 
 ### Added
 
+- [Web builder](https://endless728.github.io/resume-builder/builder/) on the docs site for people without GitHub: fill in a form, see a live preview, and download the PDF or a RenderCV YAML file. It compiles the same Typst as the workflow in the browser (typst.ts), so the PDF matches, and nothing leaves the browser.
 - Documentation site at [endless728.github.io/resume-builder](https://endless728.github.io/resume-builder/), built from `website/` with Starlight and deployed to GitHub Pages by the new `docs.yml` workflow.
 
 ## [1.2.1] - 2026-11-20

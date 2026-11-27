@@ -40,6 +40,8 @@ Modules are plain composite actions, so you can also use them in other workflows
 
 ## Get started
 
+> **No GitHub? Use the [web builder](https://endless728.github.io/resume-builder/builder/).** Fill in a form, watch the resume update as you type, and download the PDF. Same layout as the workflow, nothing leaves your browser, and **Download YAML** gives you a file you can move into a repo later.
+
 **[![Use this template](https://img.shields.io/badge/Use%20this%20template-2ea44f?style=for-the-badge&logo=github)](https://github.com/new?template_name=resume-builder-template&template_owner=EndLess728)**
 
 1. **Create your repo from the template.** Click the button above (or **Use this template** on [resume-builder-template](https://github.com/EndLess728/resume-builder-template)), and choose **Private**. Your resume has your phone number and email on it, and in a private repo the logs, artifacts and PDFs stay private too.

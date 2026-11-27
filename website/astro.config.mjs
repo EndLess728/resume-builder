@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLlmsTxt from 'starlight-llms-txt';
+import react from '@astrojs/react';
 
 const REPO = 'https://github.com/EndLess728/resume-builder';
 const TEMPLATE = 'https://github.com/EndLess728/resume-builder-template';
@@ -10,7 +11,13 @@ export default defineConfig({
   site: 'https://endless728.github.io',
   base: '/resume-builder',
   trailingSlash: 'always',
+  vite: {
+    // typst.ts ships its WASM next to the JS; let Vite bundle it as an asset.
+    optimizeDeps: { exclude: ['@myriaddreamin/typst.ts', '@myriaddreamin/typst-ts-web-compiler', '@myriaddreamin/typst-ts-renderer'] },
+    worker: { format: 'es' },
+  },
   integrations: [
+    react(),
     starlight({
       title: 'resume-builder',
       description:
@@ -69,6 +76,7 @@ export default defineConfig({
         }),
       ],
       sidebar: [
+        { label: 'Resume builder (no GitHub)', link: '/builder/', badge: { text: 'New', variant: 'tip' } },
         {
           label: 'Getting started',
           items: [
