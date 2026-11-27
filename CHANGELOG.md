@@ -9,6 +9,7 @@ or an exact tag such as `@v1.0.0` for a fixed version.
 ### Added
 
 - **Upload old resume** in the web builder: drop in a PDF, Word (.docx) or text resume and the form fills itself in (contact details, summary, jobs, education, skills, projects and other sections), ready to check and edit. Files are read in the browser and never uploaded. Scanned PDFs (images with no text) can't be read.
+- A drag-and-drop upload area in the web builder: a large drop zone on an empty form, a slim one once it's filled in, and a full-window overlay while a file is dragged anywhere over the page. On phones it reads "Tap to upload".
 
 ## [1.3.0] - 2026-11-27
 

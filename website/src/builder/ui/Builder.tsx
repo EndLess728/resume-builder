@@ -7,6 +7,7 @@ import { fromYaml, toCv, toYaml } from '../rendercv';
 import exampleYaml from '../example_CV.yaml?raw';
 import { Field } from './fields';
 import { SectionEditor } from './SectionEditor';
+import { Dropzone } from './Dropzone';
 import '../builder.css';
 
 const STORAGE_KEY = 'resume-builder:draft:v1';
@@ -64,7 +65,6 @@ export default function Builder() {
   const [updating, setUpdating] = useState(false);
   const [busyPdf, setBusyPdf] = useState(false);
   const [reading, setReading] = useState<string | null>(null);
-  const [dragging, setDragging] = useState(false);
   const [notice, setNotice] = useState<{ kind: 'info' | 'warn' | 'error'; text: string; items?: string[] } | null>(null);
   const client = useRef<TypstClient | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -160,12 +160,7 @@ export default function Builder() {
   const h = resume.header;
 
   return (
-    <div
-      className={`rb-app rb-tab-${tab}${dragging ? ' rb-dragging' : ''}`}
-      onDragOver={(e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDragging(true); } }}
-      onDragLeave={(e) => { if (e.currentTarget === e.target) setDragging(false); }}
-      onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files?.[0]; if (f) importFile(f); }}
-    >
+    <div className={`rb-app rb-tab-${tab}`}>
       <div className="rb-toolbar" role="toolbar" aria-label="Resume actions">
         <div className="rb-toolbar-group">
           <button type="button" onClick={() => fileInput.current?.click()} disabled={!!reading}
@@ -185,7 +180,6 @@ export default function Builder() {
         </div>
       </div>
 
-      {reading && <div className="rb-notice rb-info" role="status"><span><span className="rb-spinner" /> Reading {reading}…</span></div>}
       {notice && !reading && (
         <div className={`rb-notice rb-${notice.kind}`} role="status">
           <div>
@@ -198,15 +192,7 @@ export default function Builder() {
 
       <div className="rb-split">
         <div className="rb-form">
-          {isEmpty && (
-            <div className="rb-hello">
-              <strong>Fill in the form and your resume appears in the preview.</strong> Have an old resume?{' '}
-              <button type="button" className="rb-link" onClick={() => fileInput.current?.click()}>Upload it</button> (PDF or Word)
-              or drop it here, and the form fills itself in. Or{' '}
-              <button type="button" className="rb-link" onClick={loadExample}>load the example</button>. Files are read in your
-              browser and your draft stays on this device. Nothing is uploaded to a server.
-            </div>
-          )}
+          <Dropzone size={isEmpty ? 'large' : 'compact'} reading={reading} onFile={importFile} onExample={loadExample} />
 
           <section className="rb-card">
             <header className="rb-card-head"><h2>Your details</h2></header>
