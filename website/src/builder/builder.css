@@ -184,8 +184,7 @@
 .rb-field small { color: var(--rb-muted); font-size: var(--sl-text-xs); }
 .rb-app .rb-error { color: var(--rb-danger); font-size: var(--sl-text-xs); }
 .rb-row { display: flex; gap: 0.4rem; }
-.rb-date select { flex: 1.2; }
-.rb-date input { flex: 1; }
+.rb-date select { flex: 1; min-width: 0; }
 .rb-field > label.rb-check {
   display: inline-flex;
   align-self: flex-start;
