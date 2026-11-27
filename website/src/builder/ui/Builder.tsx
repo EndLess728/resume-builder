@@ -63,6 +63,8 @@ export default function Builder() {
   const [engine, setEngine] = useState<{ status: 'loading' | 'ready' | 'failed'; error?: string }>({ status: 'loading' });
   const [updating, setUpdating] = useState(false);
   const [busyPdf, setBusyPdf] = useState(false);
+  const [reading, setReading] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
   const [notice, setNotice] = useState<{ kind: 'info' | 'warn' | 'error'; text: string; items?: string[] } | null>(null);
   const client = useRef<TypstClient | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -108,11 +110,29 @@ export default function Builder() {
   const loadExample = () => replaceAll(fromYaml(exampleYaml).resume, { kind: 'info', text: 'Loaded the example. Change anything and the preview updates as you type.' });
 
   const importFile = async (file: File) => {
+    if (/\.ya?ml$/i.test(file.name)) {
+      try {
+        const { resume: r, warnings } = fromYaml(await file.text());
+        replaceAll(r, warnings.length ? { kind: 'warn', text: `Imported ${file.name}, with a few things left out:`, items: warnings } : { kind: 'info', text: `Imported ${file.name}.` });
+      } catch (e: any) {
+        setNotice({ kind: 'error', text: `Couldn't read ${file.name}: ${e.message}` });
+      }
+      return;
+    }
+    // An old resume (PDF, Word, text): read it in the browser and fill the form.
+    setReading(file.name);
     try {
-      const { resume: r, warnings } = fromYaml(await file.text());
-      replaceAll(r, warnings.length ? { kind: 'warn', text: `Imported ${file.name}, with a few things left out:`, items: warnings } : { kind: 'info', text: `Imported ${file.name}.` });
+      const { importResume } = await import('../import');
+      const { resume: r, found, warnings } = await importResume(file);
+      replaceAll(r, {
+        kind: 'warn',
+        text: `Filled the form from ${file.name}${found.length ? ` (found ${found.join(', ')})` : ''}. Reading a resume automatically isn't perfect, so please check each section and fix anything that landed in the wrong place.`,
+        items: warnings,
+      });
     } catch (e: any) {
       setNotice({ kind: 'error', text: `Couldn't read ${file.name}: ${e.message}` });
+    } finally {
+      setReading(null);
     }
   };
 
@@ -140,13 +160,20 @@ export default function Builder() {
   const h = resume.header;
 
   return (
-    <div className={`rb-app rb-tab-${tab}`}>
+    <div
+      className={`rb-app rb-tab-${tab}${dragging ? ' rb-dragging' : ''}`}
+      onDragOver={(e) => { if (e.dataTransfer.types.includes('Files')) { e.preventDefault(); setDragging(true); } }}
+      onDragLeave={(e) => { if (e.currentTarget === e.target) setDragging(false); }}
+      onDrop={(e) => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files?.[0]; if (f) importFile(f); }}
+    >
       <div className="rb-toolbar" role="toolbar" aria-label="Resume actions">
         <div className="rb-toolbar-group">
+          <button type="button" onClick={() => fileInput.current?.click()} disabled={!!reading}
+            title="PDF, Word (.docx), text, or a RenderCV YAML file">{reading ? 'Reading…' : 'Upload old resume'}</button>
           <button type="button" onClick={loadExample}>Load example</button>
-          <button type="button" onClick={() => fileInput.current?.click()}>Import YAML</button>
           <button type="button" onClick={() => replaceAll(emptyResume())}>Start over</button>
-          <input ref={fileInput} type="file" accept=".yaml,.yml,text/yaml" hidden
+          <input ref={fileInput} type="file" hidden
+            accept=".pdf,.docx,.txt,.yaml,.yml,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/yaml"
             onChange={(e) => { const f = e.target.files?.[0]; if (f) importFile(f); e.target.value = ''; }} />
         </div>
         <div className="rb-toolbar-group">
@@ -158,7 +185,8 @@ export default function Builder() {
         </div>
       </div>
 
-      {notice && (
+      {reading && <div className="rb-notice rb-info" role="status"><span><span className="rb-spinner" /> Reading {reading}…</span></div>}
+      {notice && !reading && (
         <div className={`rb-notice rb-${notice.kind}`} role="status">
           <div>
             {notice.text}
@@ -172,9 +200,11 @@ export default function Builder() {
         <div className="rb-form">
           {isEmpty && (
             <div className="rb-hello">
-              <strong>Fill in the form and your resume appears in the preview.</strong> Not sure where to start?{' '}
-              <button type="button" className="rb-link" onClick={loadExample}>Load the example</button> and edit it.
-              Your draft is saved in this browser only. Nothing is uploaded.
+              <strong>Fill in the form and your resume appears in the preview.</strong> Have an old resume?{' '}
+              <button type="button" className="rb-link" onClick={() => fileInput.current?.click()}>Upload it</button> (PDF or Word)
+              or drop it here, and the form fills itself in. Or{' '}
+              <button type="button" className="rb-link" onClick={loadExample}>load the example</button>. Files are read in your
+              browser and your draft stays on this device. Nothing is uploaded to a server.
             </div>
           )}
 

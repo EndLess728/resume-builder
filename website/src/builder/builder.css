@@ -261,6 +261,8 @@
 @keyframes rb-spin { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .rb-spinner { animation-duration: 2s; } }
 
+.rb-dragging .rb-form { outline: 2px dashed var(--sl-color-accent); outline-offset: 6px; border-radius: var(--rb-radius); }
+
 /* mobile: one pane at a time, switched by the bottom tabs */
 .rb-tabs { display: none; }
 @media (max-width: 60rem) {

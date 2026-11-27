@@ -1,0 +1,128 @@
+{
+  "resume": {
+    "version": 1,
+    "header": {
+      "name": "Karan Mehta",
+      "headline": "",
+      "location": "Mohali",
+      "email": "karan.mehta92@gmail.com",
+      "phone": "9876012345",
+      "website": "",
+      "linkedin": "",
+      "github": ""
+    },
+    "sections": [
+      {
+        "title": "Career Objective",
+        "kind": "text",
+        "text": "Seeking a challenging position as a React Native developer where I can use my skills in mobile development and grow with the organization."
+      },
+      {
+        "title": "Work Experience",
+        "kind": "experience",
+        "items": [
+          {
+            "position": "React Native Developer",
+            "company": "Smartdata Enterprises",
+            "location": "",
+            "start": "2021-06",
+            "end": "present",
+            "summary": "Developing cross-platform apps for healthcare and logistics clients.",
+            "highlights": "Integrated Razorpay and Stripe payments in 4 apps\nSet up CodePush for over-the-air updates"
+          },
+          {
+            "position": "Software Trainee",
+            "company": "Netsol Technologies",
+            "location": "",
+            "start": "2020-01",
+            "end": "2021-05",
+            "summary": "",
+            "highlights": "Fixed UI bugs in a React web portal"
+          }
+        ]
+      },
+      {
+        "title": "Internships",
+        "kind": "experience",
+        "items": [
+          {
+            "position": "Android Intern",
+            "company": "Webtunix AI",
+            "location": "Mohali",
+            "start": "2019-06",
+            "end": "2019-08",
+            "summary": "",
+            "highlights": ""
+          }
+        ]
+      },
+      {
+        "title": "Educational Qualifications",
+        "kind": "education",
+        "items": [
+          {
+            "institution": "Chandigarh Group of Colleges",
+            "degree": "B.Tech",
+            "area": "CSE",
+            "location": "Landran",
+            "start": "2016",
+            "end": "2020",
+            "summary": "7.8 CGPA",
+            "highlights": ""
+          },
+          {
+            "institution": "Govt. Model School",
+            "degree": "",
+            "area": "12th",
+            "location": "Mohali",
+            "start": "",
+            "end": "2016",
+            "summary": "82%",
+            "highlights": ""
+          },
+          {
+            "institution": "Govt. Model School",
+            "degree": "",
+            "area": "10th",
+            "location": "Mohali",
+            "start": "",
+            "end": "2014",
+            "summary": "88%",
+            "highlights": ""
+          }
+        ]
+      },
+      {
+        "title": "Key Skills",
+        "kind": "skills",
+        "items": [
+          {
+            "label": "Skills",
+            "details": "React Native, Redux, TypeScript, Firebase, REST APIs, Git, Jira"
+          }
+        ]
+      },
+      {
+        "title": "Languages",
+        "kind": "bullets",
+        "text": "English, Hindi, Punjabi"
+      }
+    ]
+  },
+  "found": [
+    "name",
+    "email",
+    "phone",
+    "location",
+    "summary",
+    "skills",
+    "languages",
+    "3 jobs",
+    "3 education entries"
+  ],
+  "warnings": [
+    "Left out \"Declaration\". Modern resumes don't need it.",
+    "Left out 2 personal details (date of birth, parents' names and so on). Resumes don't need them, and it's safer without.",
+    "Add your country code to the phone number (e.g. +91), or the GitHub workflow will reject it."
+  ]
+}

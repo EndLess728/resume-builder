@@ -1,0 +1,100 @@
+{
+  "resume": {
+    "version": 1,
+    "header": {
+      "name": "Neha Kapoor",
+      "headline": "Frontend Developer",
+      "location": "",
+      "email": "neha.kapoor@outlook.com",
+      "phone": "+91-9876501234",
+      "website": "nehakapoor.dev",
+      "linkedin": "",
+      "github": "nehak"
+    },
+    "sections": [
+      {
+        "title": "Summary",
+        "kind": "text",
+        "text": "Frontend developer who builds fast, accessible React apps. Five years shipping dashboards and design systems for fintech and edtech startups."
+      },
+      {
+        "title": "Experience",
+        "kind": "experience",
+        "items": [
+          {
+            "position": "Senior Frontend Developer",
+            "company": "Razorpay",
+            "location": "Bengaluru",
+            "start": "2021-03",
+            "end": "present",
+            "summary": "",
+            "highlights": "Rebuilt the merchant dashboard in React and TypeScript, improving page load times by 45 percent for over a million merchants across India\nCreated a shared component library used by six product teams, with Storybook docs and visual regression tests"
+          },
+          {
+            "position": "Frontend Developer",
+            "company": "Byju's",
+            "location": "Bengaluru",
+            "start": "2018-06",
+            "end": "2021-02",
+            "summary": "",
+            "highlights": "Built interactive quiz screens used by 3M students every month"
+          }
+        ]
+      },
+      {
+        "title": "Projects",
+        "kind": "projects",
+        "items": [
+          {
+            "name": "Expense Tracker",
+            "url": "",
+            "location": "",
+            "start": "",
+            "end": "",
+            "summary": "React, Firebase",
+            "highlights": "Personal finance PWA with offline sync and charts, 2k users"
+          }
+        ]
+      },
+      {
+        "title": "Education",
+        "kind": "education",
+        "items": [
+          {
+            "institution": "Delhi University",
+            "degree": "",
+            "area": "Master of Computer Applications",
+            "location": "",
+            "start": "2016",
+            "end": "2018",
+            "summary": "",
+            "highlights": ""
+          }
+        ]
+      },
+      {
+        "title": "Skills",
+        "kind": "skills",
+        "items": [
+          {
+            "label": "Skills",
+            "details": "React, TypeScript, Next.js, Redux, Tailwind CSS, Jest, Cypress, Figma"
+          }
+        ]
+      }
+    ]
+  },
+  "found": [
+    "name",
+    "email",
+    "phone",
+    "github",
+    "website",
+    "summary",
+    "skills",
+    "2 jobs",
+    "1 education entry",
+    "1 project"
+  ],
+  "warnings": []
+}

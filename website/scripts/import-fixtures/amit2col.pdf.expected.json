@@ -1,0 +1,83 @@
+{
+  "resume": {
+    "version": 1,
+    "header": {
+      "name": "Amit Singh",
+      "headline": "Android Developer",
+      "location": "Panchkula, Haryana",
+      "email": "amit.singh@yahoo.in",
+      "phone": "+91 99880 11223",
+      "website": "",
+      "linkedin": "",
+      "github": ""
+    },
+    "sections": [
+      {
+        "title": "Profile",
+        "kind": "text",
+        "text": "Android developer with 5 years of experience building consumer apps in Kotlin. Comfortable owning features from design to Play Store release."
+      },
+      {
+        "title": "Experience",
+        "kind": "experience",
+        "items": [
+          {
+            "position": "Android Developer",
+            "company": "Paytm",
+            "location": "Noida",
+            "start": "2020-08",
+            "end": "present",
+            "summary": "",
+            "highlights": "Shipped the new wallet onboarding flow to 50M users\nMoved 40 screens from XML layouts to Jetpack Compose"
+          },
+          {
+            "position": "Junior Android Developer",
+            "company": "Quark Software",
+            "location": "Mohali",
+            "start": "2018-07",
+            "end": "2020-07",
+            "summary": "",
+            "highlights": "Built offline-first field sales app used by 800 reps"
+          }
+        ]
+      },
+      {
+        "title": "Education",
+        "kind": "education",
+        "items": [
+          {
+            "institution": "Chitkara University",
+            "degree": "B.E.",
+            "area": "Electronics",
+            "location": "",
+            "start": "2014",
+            "end": "2018",
+            "summary": "",
+            "highlights": ""
+          }
+        ]
+      },
+      {
+        "title": "Skills",
+        "kind": "skills",
+        "items": [
+          {
+            "label": "Skills",
+            "details": "Kotlin, Java, Jetpack Compose, Retrofit, Room, Firebase"
+          }
+        ]
+      }
+    ]
+  },
+  "found": [
+    "name",
+    "email",
+    "phone",
+    "location",
+    "skills",
+    "summary",
+    "2 jobs",
+    "1 education entry"
+  ],
+  "warnings": []
+}

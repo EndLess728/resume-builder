@@ -1,0 +1,114 @@
+{
+  "resume": {
+    "version": 1,
+    "header": {
+      "name": "Rahul Verma",
+      "headline": "Software Test Engineer",
+      "location": "Mohali, Punjab",
+      "email": "rahul.verma@gmail.com",
+      "phone": "+91 98140 12345",
+      "website": "",
+      "linkedin": "rahulverma-qa",
+      "github": ""
+    },
+    "sections": [
+      {
+        "title": "Professional Summary",
+        "kind": "text",
+        "text": "QA engineer with 4+ years of experience in manual and automation testing of web and mobile applications. Skilled in Selenium, Appium and API testing with Postman."
+      },
+      {
+        "title": "Work Experience",
+        "kind": "experience",
+        "items": [
+          {
+            "position": "Senior Test Engineer",
+            "company": "Infosys Ltd",
+            "location": "Chandigarh",
+            "start": "2022-01",
+            "end": "present",
+            "summary": "",
+            "highlights": "Led regression testing for a banking app used by 2 lakh customers\nAutomated 300+ test cases with Selenium WebDriver and TestNG, cutting regression time by 60%\nReported and tracked bugs in Jira and worked with developers to close them before release"
+          },
+          {
+            "position": "Test Engineer",
+            "company": "TechMahindra",
+            "location": "Pune",
+            "start": "2019-07",
+            "end": "2021-12",
+            "summary": "",
+            "highlights": "Tested Android and iOS apps manually across 20+ devices\nWrote API tests in Postman for 80 endpoints"
+          }
+        ]
+      },
+      {
+        "title": "Education",
+        "kind": "education",
+        "items": [
+          {
+            "institution": "Punjab Technical University",
+            "degree": "B.Tech",
+            "area": "Computer Science",
+            "location": "Jalandhar",
+            "start": "2015",
+            "end": "2019",
+            "summary": "",
+            "highlights": ""
+          },
+          {
+            "institution": "DAV Public School",
+            "degree": "",
+            "area": "Senior Secondary (12th)",
+            "location": "Ludhiana",
+            "start": "",
+            "end": "2015",
+            "summary": "",
+            "highlights": ""
+          }
+        ]
+      },
+      {
+        "title": "Technical Skills",
+        "kind": "skills",
+        "items": [
+          {
+            "label": "Testing",
+            "details": "Manual Testing, Regression, Smoke, UAT"
+          },
+          {
+            "label": "Tools",
+            "details": "Selenium, Appium, Postman, Jira, TestRail"
+          },
+          {
+            "label": "Languages",
+            "details": "Java, SQL"
+          }
+        ]
+      },
+      {
+        "title": "Certifications",
+        "kind": "bullets",
+        "text": "ISTQB Certified Tester Foundation Level (2020)\nAWS Cloud Practitioner (2023)"
+      },
+      {
+        "title": "Languages",
+        "kind": "bullets",
+        "text": "English, Hindi, Punjabi"
+      }
+    ]
+  },
+  "found": [
+    "name",
+    "email",
+    "phone",
+    "linkedin",
+    "location",
+    "summary",
+    "skills",
+    "certifications",
+    "languages",
+    "2 jobs",
+    "2 education entries"
+  ],
+  "warnings": []
+}
